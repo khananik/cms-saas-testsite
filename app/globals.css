@@ -9,6 +9,9 @@
 
 :root {
   /* Colour */
+  /* Keep UA widgets (scrollbars, form controls, date pickers) on the authored
+     light design; without it they still render dark on a dark-mode OS. */
+  color-scheme: light;
   --ob-bg: #ffffff;
   --ob-fg: #14181f;
   --ob-muted: #5b6472;
@@ -37,17 +40,28 @@
   --ob-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ob-bg: #0e1116;
-    --ob-fg: #eef1f6;
-    --ob-muted: #a3adbd;
-    --ob-surface: #161b23;
-    --ob-border: #2a313c;
-    --ob-accent: #6ea0ff;
-    --ob-accent-fg: #0b1220;
-    --ob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
-  }
+/*
+ * Dark mode is OPT-IN, not automatic.
+ *
+ * The design of this site comes from the CMS: editors choose light surfaces
+ * (white, offwhite, opal) and the authored Raw HTML sections ship their own
+ * light palettes. Flipping the page to a dark background on
+ * prefers-color-scheme fought all of that — transparent sections showed a
+ * near-black body through, and authored dark-on-light text became invisible.
+ * The page therefore renders the authored design regardless of OS preference.
+ *
+ * To re-enable, set data-theme="dark" on <html> (a toggle, a cookie, whatever)
+ * — the tokens below are kept and ready.
+ */
+:root[data-theme="dark"] {
+  --ob-bg: #0e1116;
+  --ob-fg: #eef1f6;
+  --ob-muted: #a3adbd;
+  --ob-surface: #161b23;
+  --ob-border: #2a313c;
+  --ob-accent: #6ea0ff;
+  --ob-accent-fg: #0b1220;
+  --ob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 /* ---------- Reset ---------- */

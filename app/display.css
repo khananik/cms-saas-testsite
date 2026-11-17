@@ -76,8 +76,12 @@
 
 /* Dark mode — same pattern globals.css already uses. Light surfaces are
    re-tuned rather than left bright, so a page never flashes white panels. */
-@media (prefers-color-scheme: dark) {
-  :root {
+/*
+ * Dark surface tokens — OPT-IN only, matching globals.css.
+ * The CMS authors a light design, so the page must not flip on
+ * prefers-color-scheme. Set data-theme="dark" on <html> to use these.
+ */
+:root[data-theme="dark"] {
     --ob-bg-white: #161b23;
     --ob-fg-white: #eef1f6;
     --ob-muted-white: #a3adbd;
@@ -123,7 +127,6 @@
 
     --ob-extrude: #cbb6ff;
   }
-}
 
 /* ============================================================
    1. Wrapper baselines
