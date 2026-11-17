@@ -48,31 +48,51 @@
   overflow-wrap: anywhere;
 }
 
+/*
+ * A compact pill button. It is still an <a> underneath — this is navigation, so it
+ * keeps link semantics (middle-click, open in new tab, "link" for screen readers).
+ *
+ * The visible pill is ~32px tall so the strip stays slim, but the clickable area
+ * is the full 44px: the ::before below extends the hit target invisibly. Keep the
+ * `position: relative` and the ::before together, or the tap target shrinks.
+ */
 .link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--ob-space-1);
-  /* 44px tap target without inflating the strip: padding plus min-height. */
-  min-height: 44px;
-  padding-inline: var(--ob-space-2);
-  font-size: 0.9375rem;
+  flex: none;
+  min-height: 32px;
+  padding: 0 var(--ob-space-3);
+  border-radius: 999px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--ob-brand-bright);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  overflow-wrap: anywhere;
-  transition: color 120ms ease, opacity 120ms ease;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  /* lfgreen fill with dark fir ink: ~15:1, and the brand signature on this bar. */
+  background: var(--ob-brand-bright);
+  color: var(--ob-brand-ink);
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.link::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
 }
 
 .link:hover {
-  opacity: 0.85;
+  background: var(--ob-n2);
+}
+
+.link:active {
+  transform: translateY(1px);
 }
 
 .link:focus-visible {
   outline: 2px solid var(--ob-brand-bright);
-  outline-offset: 2px;
-  border-radius: var(--ob-space-1);
+  outline-offset: 3px;
 }
 
 .chevron {
@@ -101,7 +121,12 @@
 }
 
 .bar[data-variant="success"] .link {
-  color: var(--ob-brand-go);
+  background: var(--ob-brand-go);
+  color: var(--ob-brand-ink);
+}
+
+.bar[data-variant="success"] .link:hover {
+  background: var(--ob-n2);
 }
 
 .bar[data-variant="success"] .link:focus-visible {
@@ -125,9 +150,16 @@
   background: var(--ob-brand-ink);
 }
 
+/* On the light surfaces the pill inverts: dark fir fill, light ink. */
 .bar[data-variant="warning"] .link,
 .bar[data-variant="alert"] .link {
-  color: var(--ob-brand-ink);
+  background: var(--ob-brand-ink);
+  color: var(--ob-n2);
+}
+
+.bar[data-variant="warning"] .link:hover,
+.bar[data-variant="alert"] .link:hover {
+  background: var(--ob-brand-ink-2);
 }
 
 .bar[data-variant="warning"] .link:focus-visible,
@@ -141,7 +173,8 @@
     transition: none;
   }
 
-  .link:hover .chevron {
+  .link:hover .chevron,
+  .link:active {
     transform: none;
   }
 }
