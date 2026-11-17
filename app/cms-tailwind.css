@@ -1,0 +1,25 @@
+/* ============================================================
+   Tailwind utilities for CMS-AUTHORED markup only.
+
+   Some RawHtmlBlock sections in the CMS are written in Tailwind classes. This file
+   generates exactly the utilities those sections use — nothing scans our own
+   source code (source(none)), so our components are unaffected and the output
+   stays small.
+
+   The class list comes from cms-content/raw-html-classes.txt, which
+   scripts/build-cms-classes.mjs refreshes from Graph before every build.
+
+   Deliberately NOT included: Tailwind's preflight (its global reset would restyle
+   the whole site). A preflight scoped to `.ob-raw` lives at the end of
+   globals.css instead.
+
+   Utilities are imported UNLAYERED on purpose. Our globals reset uses element
+   selectors (0,0,1); unlayered class utilities (0,1,0) therefore win on authored
+   elements, which is what the author intended. Had they been put in a cascade
+   layer, every unlayered element rule in globals.css would beat them.
+   ============================================================ */
+
+@import "tailwindcss/theme.css" source(none);
+@import "tailwindcss/utilities.css" source(none);
+
+@source "../cms-content/raw-html-classes.txt";

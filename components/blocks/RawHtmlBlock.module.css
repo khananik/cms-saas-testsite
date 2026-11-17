@@ -12,15 +12,19 @@
 .block {
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-4) var(--ob-space-3);
+  /* Full-width band: vertical rhythm only. The page gutter lives on .inner. */
+  padding: var(--ob-space-4) 0;
   /* Inherited default ink only: authored colour rules still win over this. */
   color: var(--ob-fg);
 }
 
 .inner {
+  /* Canonical content box: gutter inside the max-width box. */
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
-  margin: 0 auto;
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
   overflow-wrap: break-word;
 }
 
@@ -64,6 +68,6 @@
 
 @media (min-width: 640px) {
   .block {
-    padding: var(--ob-space-5) var(--ob-space-4);
+    padding: var(--ob-space-5) 0;
   }
 }

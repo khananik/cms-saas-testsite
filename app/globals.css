@@ -67,6 +67,9 @@
   /* Shape and layout */
   --ob-radius: 10px;
   --ob-maxw: 1120px;
+  /* The page gutter. ONE value every section aligns to — the header, the footer
+     and every block's content box. 16px on phones, 24px from 900px (see below). */
+  --ob-gutter: var(--ob-space-3);
 
   /* Typography */
   /* Inter is the typeface the CMS's authored sections ask for. It is loaded by
@@ -103,6 +106,12 @@
   --ob-accent: #6ea0ff;
   --ob-accent-fg: #0b1220;
   --ob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 900px) {
+  :root {
+    --ob-gutter: var(--ob-space-4);
+  }
 }
 
 /* ---------- Reset ---------- */
@@ -204,11 +213,23 @@ hr {
 
 /* ---------- Utilities ---------- */
 
+/*
+ * THE content box. Every section's content aligns to this, so left edges line up
+ * down the whole page. The gutter sits INSIDE the max-width box (border-box), so
+ * at 1440px content starts at (1440 - 1120) / 2 + 24 = 184px — the same edge as
+ * the header logo. Blocks reproduce this exact pattern in their CSS Modules:
+ *   box-sizing: border-box; width: 100%; max-width: var(--ob-maxw);
+ *   margin-inline: auto; padding-inline: var(--ob-gutter);
+ * Never put the gutter OUTSIDE the max-width box, and never pad twice: inside a
+ * layout section --ob-gutter is reset to 0 for descendants (layout.module.css),
+ * because the section container has already applied it.
+ */
 .ob-container {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding-inline: var(--ob-space-3);
+  padding-inline: var(--ob-gutter);
 }
 
 /* The single page region, a direct flex child of body. It takes the slack so a
@@ -279,4 +300,71 @@ hr {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ============================================================
+   Scoped preflight for CMS-authored markup (RawHtmlBlock → .ob-raw).
+
+   Authored sections written in Tailwind assume Tailwind's preflight: headings that
+   inherit size and weight, unstyled links and lists, zero default margins. We do
+   not load Tailwind's real preflight (it would reset the whole site), so these
+   rules recreate the parts that matter, scoped to .ob-raw.
+
+   Specificity is deliberate. `:where(.ob-raw)` adds nothing, so each rule weighs
+   the same as the element rules above (0,0,1) and wins only by coming later in
+   this file — while every Tailwind utility class (0,1,0) still beats it. Keep this
+   block at the END of the file for that reason.
+   ============================================================ */
+
+:where(.ob-raw) *,
+:where(.ob-raw) ::before,
+:where(.ob-raw) ::after {
+  box-sizing: border-box;
+  border: 0 solid;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.ob-raw) h1,
+:where(.ob-raw) h2,
+:where(.ob-raw) h3,
+:where(.ob-raw) h4,
+:where(.ob-raw) h5,
+:where(.ob-raw) h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+:where(.ob-raw) a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+:where(.ob-raw) ol,
+:where(.ob-raw) ul,
+:where(.ob-raw) menu {
+  list-style: none;
+}
+
+:where(.ob-raw) img,
+:where(.ob-raw) svg,
+:where(.ob-raw) video,
+:where(.ob-raw) canvas,
+:where(.ob-raw) iframe {
+  display: block;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+:where(.ob-raw) img,
+:where(.ob-raw) video {
+  height: auto;
+}
+
+:where(.ob-raw) button {
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
 }

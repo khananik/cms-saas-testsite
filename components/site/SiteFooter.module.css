@@ -21,9 +21,10 @@
 
 .inner {
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding: var(--ob-space-6) var(--ob-space-3) var(--ob-space-5);
+  padding: var(--ob-space-6) var(--ob-gutter) var(--ob-space-5);
   display: flex;
   flex-direction: column;
   gap: var(--ob-space-5);
@@ -162,9 +163,10 @@
 
 .legalInner {
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding: var(--ob-space-3);
+  padding: var(--ob-space-3) var(--ob-gutter);
 }
 
 .copyright {
@@ -189,14 +191,6 @@
 }
 
 @media (min-width: 900px) {
-  .inner {
-    padding-inline: var(--ob-space-5);
-  }
-
-  .legalInner {
-    padding-inline: var(--ob-space-5);
-  }
-
   .footer[data-layout="columns"] .inner {
     flex-direction: row;
     align-items: flex-start;

@@ -84,6 +84,15 @@ export default function TestimonialBlock({ data, ctx }: BlockComponentProps) {
       <figure className={styles.figure}>
         <span className={styles.glow} aria-hidden="true" />
 
+        {/* Decorative pull-quote mark: the quote text itself carries the
+            meaning, so this is hidden from assistive tech. It sits outside the
+            blockquote so the grid can place it in the aside column. */}
+        {quote ? (
+          <span className={styles.mark} aria-hidden="true">
+            {"\u201C"}
+          </span>
+        ) : null}
+
         {rating !== undefined ? (
           <p
             className={styles.rating}
@@ -104,11 +113,6 @@ export default function TestimonialBlock({ data, ctx }: BlockComponentProps) {
 
         {quote ? (
           <blockquote className={styles.quote}>
-            {/* Decorative pull-quote mark: the quote text itself carries the
-                meaning, so this is hidden from assistive tech. */}
-            <span className={styles.mark} aria-hidden="true">
-              {"“"}
-            </span>
             <p
               {...editable(
                 ctx,

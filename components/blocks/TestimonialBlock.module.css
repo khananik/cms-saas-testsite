@@ -1,7 +1,14 @@
+/* The section is the canonical content box (gutter inside the max-width), so
+   the narrower card below centres on the shared page grid. There is no
+   separate inner wrapper in the markup, and --ob-bg matches the page, so the
+   band itself carries the box. */
 .block {
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-6) var(--ob-space-3);
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-block: var(--ob-space-6);
+  padding-inline: var(--ob-gutter);
   background: var(--ob-bg);
   color: var(--ob-fg);
 }
@@ -9,11 +16,18 @@
 /* The card is a dark fir slab on the light page: it breaks the rhythm of the
    surrounding light sections and is the one place --ob-brand-bright is legal,
    because it only ever sits on --ob-brand-ink here. The ink/neutral tokens used
-   inside are theme-stable, so the card keeps its contrast under data-theme. */
+   inside are theme-stable, so the card keeps its contrast under data-theme.
+
+   Divider colour: --ob-brand-fir on --ob-brand-ink is ~3.2:1, which clears the
+   3:1 non-text boundary minimum while staying on-brand (the old --ob-n7 rule
+   read as muddy olive). */
 .figure {
+  --_rule: var(--ob-brand-fir);
+
   position: relative;
   box-sizing: border-box;
-  max-width: min(var(--ob-maxw), 56rem);
+  width: 100%;
+  max-width: 60rem;
   margin: 0 auto;
   padding: var(--ob-space-5) var(--ob-space-4);
   display: flex;
@@ -28,18 +42,31 @@
   font-family: var(--ob-font);
 }
 
-/* Decorative wash in the top-right corner; aria-hidden element in the markup. */
+/* Decorative wash behind the quote mark; aria-hidden element in the markup. */
 .glow {
   position: absolute;
-  inset-block-start: calc(var(--ob-space-6) * -1);
-  inset-inline-end: calc(var(--ob-space-6) * -1);
-  width: 16rem;
-  height: 16rem;
+  inset-block-start: calc(var(--ob-space-5) * -1);
+  inset-inline-start: calc(var(--ob-space-5) * -1);
+  width: 12rem;
+  height: 12rem;
   border-radius: 50%;
   background: var(--ob-brand-fir);
-  opacity: 0.22;
+  opacity: 0.24;
   filter: blur(40px);
   pointer-events: none;
+}
+
+/* Oversized pull-quote mark. In flow (never absolutely positioned) so it can
+   never widen the card at 360px. */
+.mark {
+  position: relative;
+  display: block;
+  height: 0.5em;
+  font-size: 5rem;
+  line-height: 0.9;
+  font-weight: 800;
+  color: var(--ob-brand-bright);
+  user-select: none;
 }
 
 .rating {
@@ -62,28 +89,16 @@
 .quote {
   position: relative;
   margin: 0;
-  max-width: 34ch;
-  font-size: clamp(1.375rem, 1.05rem + 1.45vw, 2rem);
+  font-size: clamp(1.375rem, 1.1rem + 1.1vw, 2.125rem);
   font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
   color: var(--ob-n2);
-}
-
-/* Oversized pull-quote mark. Laid out in flow rather than absolutely
-   positioned so it can never widen the card at 360px. */
-.mark {
-  display: block;
-  margin-bottom: calc(var(--ob-space-2) * -1);
-  font-size: clamp(3.5rem, 11vw, 5.5rem);
-  line-height: 0.62;
-  font-weight: 700;
-  color: var(--ob-brand-bright);
-  opacity: 0.7;
 }
 
 .quote p {
   margin: 0;
+  max-width: 32ch;
   overflow-wrap: anywhere;
   text-wrap: pretty;
 }
@@ -101,7 +116,7 @@
   align-items: center;
   gap: var(--ob-space-3);
   padding-top: var(--ob-space-4);
-  border-top: 1px solid var(--ob-n7);
+  border-top: 1px solid var(--_rule);
 }
 
 /* Avatar well: ring + recessed fill so the slot reads deliberately even when
@@ -113,7 +128,7 @@
   border-radius: 50%;
   object-fit: cover;
   background: var(--ob-brand-ink-2);
-  box-shadow: 0 0 0 2px var(--ob-n7);
+  box-shadow: 0 0 0 2px var(--ob-brand-fir);
 }
 
 .captionText {
@@ -124,7 +139,7 @@
 }
 
 .authorName {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.005em;
   color: var(--ob-n2);
@@ -141,10 +156,59 @@
 @media (min-width: 640px) {
   .figure {
     padding: var(--ob-space-6) var(--ob-space-5);
-    gap: var(--ob-space-5);
+  }
+}
+
+/* Two-column composition: an aside (big mark on top, attribution at the
+   bottom) divided from the quote by a vertical fir rule. Grid areas place the
+   children; DOM/reading order stays quote -> attribution. */
+@media (min-width: 720px) {
+  .figure {
+    display: grid;
+    grid-template-columns: clamp(10rem, 22%, 14rem) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "mark rating"
+      "mark quote"
+      "caption quote";
+    column-gap: var(--ob-space-5);
+    row-gap: 0;
+  }
+
+  .mark,
+  .caption {
+    padding-inline-end: var(--ob-space-4);
+    border-inline-end: 1px solid var(--_rule);
+  }
+
+  .mark {
+    grid-area: mark;
+    height: auto;
+    font-size: clamp(7rem, 4rem + 6vw, 10rem);
+    line-height: 0.78;
+  }
+
+  .rating {
+    grid-area: rating;
+    margin-bottom: var(--ob-space-4);
   }
 
   .quote {
-    max-width: 24ch;
+    grid-area: quote;
+    align-self: center;
+    font-size: clamp(1.5rem, 0.85rem + 1.55vw, 2.375rem);
+    line-height: 1.28;
+  }
+
+  .quote p {
+    max-width: 30ch;
+  }
+
+  .caption {
+    grid-area: caption;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: var(--ob-space-4);
+    border-top: 0;
   }
 }

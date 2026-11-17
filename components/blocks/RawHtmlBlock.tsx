@@ -47,7 +47,9 @@ export default function RawHtmlBlock({ data, ctx }: BlockComponentProps) {
   return (
     <section className={styles.block} aria-label={label}>
       <div
-        className={styles.inner}
+        // `ob-raw` marks CMS-authored markup: globals.css gives it a scoped Tailwind
+        // preflight, and display.css keeps its typography rules out of it.
+        className={`ob-raw ${styles.inner}`}
         // Containment, not decoration: `position: relative` makes this div the
         // containing block for any absolutely positioned authored element, and
         // `isolation: isolate` opens a stacking context so an authored z-index

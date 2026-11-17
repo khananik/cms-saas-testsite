@@ -7,9 +7,13 @@
  * the dark ink surfaces.
  */
 .block {
+  /* Canonical content box: gutter inside the max-width. */
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-5) var(--ob-space-3);
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-block: var(--ob-space-5);
+  padding-inline: var(--ob-gutter);
   color: var(--ob-fg);
 }
 
@@ -331,7 +335,7 @@
 
 @media (min-width: 640px) {
   .block {
-    padding: var(--ob-space-6) var(--ob-space-4);
+    padding-block: var(--ob-space-6);
   }
 }
 

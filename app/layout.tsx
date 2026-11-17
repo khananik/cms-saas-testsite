@@ -9,6 +9,8 @@ import { getSiteChrome } from "@/lib/queries";
 import type { SiteChrome } from "@/lib/types";
 
 import "./globals.css";
+// Tailwind utilities for CMS-authored Raw HTML only — see app/cms-tailwind.css.
+import "./cms-tailwind.css";
 
 /**
  * Self-hosted at build time by next/font, so there is no Google Fonts request

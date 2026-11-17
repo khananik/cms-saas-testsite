@@ -10,7 +10,26 @@ function isExternal(href: string): boolean {
 }
 
 /**
- * Full-width hero on a dark fir-ink surface: oversized display type, a
+ * Splits a headline into everything before its last word and the last word,
+ * so the last word can carry the Opal accent. Returns null for one-word or
+ * empty headlines (nothing to emphasise against).
+ */
+function splitLastWord(text: string): { lead: string; last: string } | null {
+  const trimmed = text.trim();
+  const at = trimmed.lastIndexOf(" ");
+  if (at <= 0) return null;
+  return { lead: trimmed.slice(0, at), last: trimmed.slice(at + 1) };
+}
+
+/**
+ * Surface-aware hero. By default (no node background, or a dark/brand one)
+ * it is a full-width dark fir-ink statement band. When the editor paints the
+ * node with a light surface (opal, white, offwhite, bluegrad, purple), the CSS
+ * Module drops the hero's own background and switches to a light variant, so
+ * the CMS setting always wins. On Opal the last headline word takes the Opal
+ * accent gradient and soft decorative orbs sit behind the text.
+ *
+ * Original notes: full-width hero on a dark fir-ink surface: oversized display type, a
  * subheadline at a comfortable measure, and a bright-green pill CTA. An
  * optional background image sits behind a fir-tinted scrim. Single column
  * throughout; gutter-safe at 360px.
@@ -32,6 +51,11 @@ export default function HeroBlock({ data, ctx }: BlockComponentProps) {
   // pickLink runs the href through the same allowlist; never render an <a> without it.
   const cta = pickLink(data, "ctaLink", "cta", "primaryCta", "link", "callToAction");
   const ctaLabel = pickString(data, "ctaText", "ctaLabel", "linkText") ?? cta?.label ?? "Learn more";
+
+  // The accent span is presentation only: the h1's accessible name is still the
+  // full sentence. In edit mode the headline stays a single text node so the
+  // CMS in-place editor sees exactly the field value.
+  const headingParts = heading && !ctx?.isEditMode ? splitLastWord(heading) : null;
 
   const hasText = Boolean(heading || subheading);
   if (!hasText && !cta) return null;
@@ -63,7 +87,14 @@ export default function HeroBlock({ data, ctx }: BlockComponentProps) {
             className={styles.heading}
             {...editable(ctx, data, "headline", "heading", "title", "name")}
           >
-            {heading}
+            {headingParts ? (
+              <>
+                {headingParts.lead}{" "}
+                <span className={styles.accent}>{headingParts.last}</span>
+              </>
+            ) : (
+              heading
+            )}
           </h1>
         ) : null}
         {subheading ? (

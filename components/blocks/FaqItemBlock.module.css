@@ -1,13 +1,15 @@
-/* One question/answer row. Renders standalone on --ob-bg and nested inside the
-   FAQ container's --ob-surface card, so it carries no background of its own. */
+/* One question/answer row. The FAQ container draws the hairline rules between
+   rows; the item itself only carries the open-state emphasis, so it reads the
+   same standalone or nested. */
 .item {
   border-radius: var(--ob-radius);
+  transition: background-color 200ms ease;
 }
 
-/* Only draw a rule between consecutive items; a lone item sits flush inside its
-   card instead of ending on a stray line. */
-.item + .item {
-  border-top: 1px solid var(--ob-border);
+/* Open row: a faint accent wash so the expanded question and its answer read as
+   one unit. Derived from --ob-accent so it follows the surface tokens. */
+.item[data-open="true"] {
+  background: color-mix(in srgb, var(--ob-accent) 5%, transparent);
 }
 
 .heading {
@@ -25,7 +27,7 @@
   width: 100%;
   min-height: 44px;
   margin: 0;
-  padding: var(--ob-space-3);
+  padding: calc(var(--ob-space-3) + var(--ob-space-1)) var(--ob-space-3);
   border: 0;
   border-radius: var(--ob-radius);
   background: transparent;
@@ -36,6 +38,9 @@
   line-height: 1.45;
   letter-spacing: -0.005em;
   text-align: left;
+  /* Global headings balance their lines, which leaves short questions in a
+     narrow ragged column on phones; "pretty" only avoids orphans. */
+  text-wrap: pretty;
   cursor: pointer;
   transition: background-color 160ms ease;
 }
@@ -53,6 +58,10 @@
   outline-offset: -2px;
 }
 
+.item[data-open="true"] .trigger:hover {
+  background: transparent;
+}
+
 .question {
   flex: 1 1 auto;
   min-width: 0;
@@ -63,8 +72,8 @@
 .chevron {
   position: relative;
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--ob-accent) 10%, transparent);
   transition: transform 220ms ease, background-color 160ms ease;
@@ -109,11 +118,11 @@
   min-height: 0;
 }
 
+/* Answer: indented to the question's text edge and held to a readable measure. */
 .answer {
   margin: 0 var(--ob-space-3);
-  padding: var(--ob-space-3) 0 var(--ob-space-4);
-  border-top: 1px solid var(--ob-border);
-  max-width: 68ch;
+  padding: 0 0 var(--ob-space-4);
+  max-width: 64ch;
   color: var(--ob-muted);
   font-size: 1rem;
   line-height: 1.7;
@@ -224,6 +233,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .item,
   .trigger,
   .panelOuter,
   .chevron {
@@ -233,11 +243,11 @@
 
 @media (min-width: 640px) {
   .trigger {
-    padding: var(--ob-space-3) var(--ob-space-4);
+    padding: calc(var(--ob-space-3) + var(--ob-space-1)) var(--ob-space-4);
   }
 
   .answer {
-    margin: 0 var(--ob-space-4);
-    padding-bottom: var(--ob-space-5);
+    margin: 0 calc(var(--ob-space-4) + 32px + var(--ob-space-3)) 0 var(--ob-space-4);
+    padding-bottom: var(--ob-space-4);
   }
 }

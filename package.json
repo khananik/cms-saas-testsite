@@ -8,10 +8,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild": "node scripts/build-cms-classes.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "graph:types": "node scripts/graph-types.mjs"
+    "graph:types": "node scripts/graph-types.mjs",
+    "cms:classes": "node scripts/build-cms-classes.mjs"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -20,12 +22,14 @@
     "sanitize-html": "2.18.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@types/sanitize-html": "2.16.2",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.6",
+    "tailwindcss": "4.3.5",
     "typescript": "5.9.3"
   }
 }

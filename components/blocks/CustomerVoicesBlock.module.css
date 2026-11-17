@@ -2,16 +2,25 @@
    Section surface: --ob-surface. Card surface: --ob-bg. */
 
 .block {
+  --cv-gap: var(--ob-space-4);
+  /* Share of the track one slide takes: ~1.15 visible on phones so the next card peeks. */
+  --cv-slide: 85%;
+  /* This block paints its own light surface, so it pins the brand fir accent rather
+     than inheriting a --ob-accent remapped by the wrapper's display settings. */
+  --cv-accent: var(--ob-brand-fir);
   background: var(--ob-surface);
   color: var(--ob-fg);
   padding-block: var(--ob-space-6);
+  padding-inline: 0;
   border-block: 1px solid var(--ob-border);
 }
 
 .inner {
+  box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding-inline: var(--ob-space-3);
+  padding-inline: var(--ob-gutter);
   font-family: var(--ob-font);
 }
 
@@ -28,11 +37,7 @@
   height: 4px;
   border-radius: 2px;
   margin-bottom: var(--ob-space-3);
-  background: linear-gradient(
-    90deg,
-    var(--ob-brand-fir) 0%,
-    var(--ob-brand-go) 100%
-  );
+  background: linear-gradient(90deg, var(--ob-brand-fir) 0%, var(--ob-brand-go) 100%);
 }
 
 .heading {
@@ -56,46 +61,60 @@
   position: relative;
 }
 
-/* Static grid: up to three columns, one column on small screens. */
+/* Static grid (three or fewer cards): one column, then two, then three. */
 .grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--ob-space-4);
+  gap: var(--cv-gap);
   grid-template-columns: 1fr;
   align-items: stretch;
 }
 
-/* Slider: CSS-only scroll-snap works with or without JS. */
+/* Slider: a flex row that genuinely overflows. CSS scroll-snap makes it a native
+   swipeable row before (or without) hydration; JS only adds the controls. */
 .track {
   list-style: none;
   margin: 0;
-  padding: var(--ob-space-1) var(--ob-space-1) var(--ob-space-3);
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: var(--ob-space-4);
+  /* Vertical room for the card shadow and hover lift, which overflow-x would clip. */
+  padding: var(--ob-space-2) 0 var(--ob-space-4);
+  display: flex;
+  gap: var(--cv-gap);
   align-items: stretch;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 0;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--ob-n6) transparent;
 }
 
+/* With JS the arrows and dots replace the scrollbar. */
+.enhanced {
+  scrollbar-width: none;
+}
+
+.enhanced::-webkit-scrollbar {
+  display: none;
+}
+
 .track:focus-visible {
-  outline: 2px solid var(--ob-accent);
+  outline: 2px solid var(--cv-accent);
   outline-offset: 4px;
   border-radius: var(--ob-radius);
 }
 
 .item {
-  scroll-snap-align: start;
-  min-width: 0;
   display: flex;
+  min-width: 0;
+}
+
+.track > .item {
+  flex: 0 0 var(--cv-slide);
+  min-width: 260px;
+  scroll-snap-align: start;
 }
 
 .card {
@@ -107,13 +126,12 @@
   width: 100%;
   background: var(--ob-bg);
   border: 1px solid var(--ob-border);
-  border-radius: var(--ob-radius);
+  border-radius: calc(var(--ob-radius) * 1.6);
   box-shadow: var(--ob-shadow);
-  padding: var(--ob-space-4);
+  padding: var(--ob-space-5) var(--ob-space-4) var(--ob-space-4);
   overflow: hidden;
   transition:
     transform 180ms ease,
-    box-shadow 180ms ease,
     border-color 180ms ease;
 }
 
@@ -133,18 +151,17 @@
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--ob-n5);
-  box-shadow: var(--ob-shadow);
 }
 
 /* Oversized decorative quote mark. aria-hidden in markup. */
 .mark {
   display: block;
-  font-size: 3rem;
-  line-height: 0.7;
-  height: 1.4rem;
-  color: var(--ob-n5);
+  font-size: 4rem;
+  line-height: 0.8;
+  height: 2rem;
+  color: var(--ob-brand-grass);
   font-family: Georgia, "Times New Roman", serif;
   user-select: none;
 }
@@ -153,7 +170,9 @@
   margin: 0;
   color: var(--ob-fg);
   font-size: 1.0625rem;
-  line-height: 1.65;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  max-width: 42ch;
   text-wrap: pretty;
 }
 
@@ -166,9 +185,10 @@
 }
 
 .quote a {
-  color: var(--ob-accent);
+  color: var(--cv-accent);
 }
 
+/* Attribution anchored to the bottom so cards in a row line up. */
 .person {
   display: flex;
   align-items: center;
@@ -179,8 +199,8 @@
 }
 
 .avatar {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   flex: 0 0 auto;
   border-radius: 50%;
   object-fit: cover;
@@ -208,13 +228,18 @@
   line-height: 1.4;
 }
 
+/* Controls: dots on the left, arrow pair on the right. */
 .controls {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: var(--ob-space-3);
-  margin-top: var(--ob-space-4);
-  flex-wrap: wrap;
+  margin-top: var(--ob-space-2);
+}
+
+.arrows {
+  display: flex;
+  gap: var(--ob-space-2);
 }
 
 .arrow {
@@ -222,66 +247,77 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  font-size: 1.125rem;
+  width: 48px;
+  height: 48px;
+  padding: 0;
   color: var(--ob-fg);
   background: var(--ob-bg);
+  /* --ob-n7 on white and on --ob-surface clears 3:1 for a UI boundary. */
   border: 1px solid var(--ob-n7);
   border-radius: 50%;
   cursor: pointer;
   transition:
     background-color 150ms ease,
     color 150ms ease,
-    border-color 150ms ease;
+    border-color 150ms ease,
+    opacity 150ms ease;
 }
 
 .arrow:hover:not(:disabled) {
-  background: var(--ob-accent);
-  border-color: var(--ob-accent);
-  color: var(--ob-accent-fg);
+  background: var(--cv-accent);
+  border-color: var(--cv-accent);
+  color: var(--ob-bg);
 }
 
 .arrow:disabled {
-  opacity: 0.45;
-  cursor: default;
+  color: var(--ob-n6);
+  border-color: var(--ob-border);
+  background: transparent;
+  cursor: not-allowed;
 }
 
 .arrow:focus-visible,
 .dot:focus-visible {
-  outline: 2px solid var(--ob-accent);
+  outline: 2px solid var(--cv-accent);
   outline-offset: 2px;
 }
 
 .dots {
   display: flex;
   align-items: center;
-  gap: var(--ob-space-1);
+  flex-wrap: wrap;
 }
 
+/* 44px hit area around a small visible pill. */
 .dot {
   appearance: none;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
+  margin-inline: -8px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: none;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
+}
+
+.dot:first-child {
+  margin-inline-start: -8px;
 }
 
 .dot::before {
   content: "";
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  /* --ob-n7 keeps inactive dots above 3:1 on --ob-surface. */
   background: var(--ob-n7);
   transition:
-    background-color 150ms ease,
-    transform 150ms ease;
+    background-color 200ms ease,
+    width 200ms ease;
 }
 
 .dot:hover::before {
@@ -289,31 +325,36 @@
 }
 
 .dot[aria-current="true"]::before {
-  background: var(--ob-accent);
-  transform: scale(1.4);
+  width: 28px;
+  background: var(--cv-accent);
 }
 
 @media (min-width: 640px) {
+  .block {
+    --cv-slide: calc((100% - var(--cv-gap)) / 2);
+  }
+
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .track {
-    grid-auto-columns: minmax(0, calc(50% - var(--ob-space-4) / 2));
-  }
-
   .card {
-    padding: var(--ob-space-5) var(--ob-space-4) var(--ob-space-4);
+    padding: var(--ob-space-5);
   }
 }
 
 @media (min-width: 960px) {
+  .block {
+    --cv-gap: var(--ob-space-4);
+    --cv-slide: calc((100% - var(--cv-gap) * 2) / 3);
+  }
+
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .track {
-    grid-auto-columns: minmax(0, calc(33.3333% - var(--ob-space-4) * 2 / 3));
+  .quote {
+    font-size: 1.125rem;
   }
 }
 
@@ -329,10 +370,6 @@
   }
 
   .card:hover {
-    transform: none;
-  }
-
-  .dot[aria-current="true"]::before {
     transform: none;
   }
 }

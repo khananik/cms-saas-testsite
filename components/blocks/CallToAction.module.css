@@ -1,16 +1,19 @@
 .cta {
+  /* Canonical content box: gutter inside the max-width box. The card (.inner)
+     fills it, so its edge sits on the page's content edge. */
+  box-sizing: border-box;
   width: 100%;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
   font-family: var(--ob-font);
   color: var(--ob-fg);
-  padding: 0 var(--ob-space-3);
-  box-sizing: border-box;
 }
 
 .inner {
   position: relative;
   box-sizing: border-box;
-  max-width: var(--ob-maxw);
-  margin: 0 auto;
+  width: 100%;
   padding: var(--ob-space-5) var(--ob-space-3);
   display: flex;
   flex-direction: column;

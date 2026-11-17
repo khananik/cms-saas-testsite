@@ -1,29 +1,52 @@
 .block {
   background: var(--ob-bg);
   color: var(--ob-fg);
-  padding: var(--ob-space-6) var(--ob-space-3);
+  /* Full-width band: vertical padding only; the gutter lives on .inner. */
+  padding: var(--ob-space-6) 0;
 }
 
 /*
  * Solo is the real shape in this instance: a single stat that the CMS places in a
- * row beside sibling StatsCounterBlocks. It drops the section chrome and flexes so
- * a row of them shares the width evenly, wrapping instead of overflowing at 360px.
+ * row beside sibling StatsCounterBlocks. It drops the section chrome and becomes a
+ * size container so each card can pick its own layout from the width it is given.
+ *
+ * Breathing room: the authored section around the stat row has no vertical
+ * padding, so the cards would otherwise sit flush against whatever band precedes
+ * them. The stat owns that gap itself.
  */
 .block.solo {
   padding: 0;
   background: transparent;
   flex: 1 1 13rem;
   min-width: 0;
+  margin-block-start: var(--ob-space-5);
+  container-type: inline-size;
+  container-name: stat;
 }
 
+/*
+ * Below the layout's stacking breakpoint the columns become one vertical list.
+ * Only the first stat keeps the top gap; the rest rely on the row gap so the
+ * stacked set stays tight. (Read-only context selector: styles only this block.)
+ */
+@media (max-width: 860px) {
+  :global(.ob-column) + :global(.ob-column) .block.solo {
+    margin-block-start: 0;
+  }
+}
+
+/*
+ * Canonical content box: gutter sits inside the max-width box. Inside a layout
+ * section (the solo case) --ob-gutter is zeroed by the section, so the cards run
+ * edge to edge of their column and the row starts/ends on the content edges.
+ */
 .inner {
+  box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
-  margin: 0 auto;
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
   height: 100%;
-}
-
-.solo .inner {
-  max-width: none;
 }
 
 .heading {
@@ -57,9 +80,11 @@
 }
 
 /*
- * The card. Siblings in a row stretch to a shared height, and every card carries
- * the same brand rule along its top edge so a row reads as one deliberate set
- * even though each stat is a separate CMS block.
+ * The card. Each stat is a separate CMS block in its own column, so the row cannot
+ * be relied on to stretch them; instead every card reserves the same space (value
+ * line + a two-line label slot) and therefore lands at the same height whatever the
+ * label length. White cards with a hairline border and a short fir rule read as one
+ * deliberate set and separate cleanly from the tinted band above.
  */
 .item {
   position: relative;
@@ -67,11 +92,10 @@
   flex-direction: column-reverse;
   justify-content: flex-end;
   gap: var(--ob-space-2);
-  background: var(--ob-surface);
+  background: var(--ob-bg);
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius);
-  box-shadow: var(--ob-shadow);
-  padding: var(--ob-space-4) var(--ob-space-4) var(--ob-space-4);
+  padding: var(--ob-space-4);
   min-width: 0;
   height: 100%;
   overflow: hidden;
@@ -82,16 +106,18 @@
   content: "";
   position: absolute;
   inset-block-start: 0;
-  inset-inline: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--ob-brand-fir), var(--ob-brand-grass));
+  inset-inline-start: var(--ob-space-4);
+  width: var(--ob-space-5);
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: var(--ob-brand-fir);
   pointer-events: none;
 }
 
 .value {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: clamp(2.75rem, 1.9rem + 4vw, 4.25rem);
+  font-size: clamp(2.5rem, 1.9rem + 2.4vw, 3.5rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.045em;
@@ -125,6 +151,8 @@
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.35;
+  /* Two-line slot so a wrapping label never makes its card taller than siblings. */
+  min-height: calc(2em * 1.35);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   text-wrap: balance;
@@ -144,9 +172,37 @@
   white-space: nowrap;
 }
 
-@media (max-width: 23.4375rem) {
+/*
+ * Wide container = the stats have stacked one per row (tablet and phone). A tall
+ * card per stat wastes the screen, so each becomes a slim horizontal row: number
+ * on the left, label beside it, same white card treatment.
+ */
+@container stat (min-width: 22rem) {
   .item {
-    padding: var(--ob-space-3);
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--ob-space-4);
+    padding: var(--ob-space-3) var(--ob-space-4);
+  }
+
+  .item::before {
+    inset-block: var(--ob-space-3);
+    inset-inline-start: 0;
+    width: 3px;
+    height: auto;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .value {
+    flex: 0 0 auto;
+    min-width: 6.75rem;
+    font-size: 2.5rem;
+  }
+
+  .label {
+    min-height: 0;
+    flex: 1 1 auto;
   }
 }
 

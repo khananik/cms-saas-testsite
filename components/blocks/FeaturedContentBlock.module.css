@@ -22,15 +22,21 @@
   /* The decorative flourish sits outside the frame; clipping here is what
      guarantees no horizontal scroll at 360px. */
   overflow: hidden;
-  padding: var(--ob-space-6) var(--ob-space-3);
+  /* Full-width band: vertical padding only; .inner owns the gutter. */
+  padding-block: var(--ob-space-6);
+  padding-inline: 0;
   background: var(--ob-bg);
   color: var(--ob-fg);
   font-family: var(--ob-font);
 }
 
 .inner {
+  /* Canonical content box: gutter inside the max-width. */
+  box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
-  margin: 0 auto;
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
 }
 
 .row {

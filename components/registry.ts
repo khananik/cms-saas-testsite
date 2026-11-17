@@ -15,6 +15,7 @@ import CallToAction from "./blocks/CallToAction";
 import RawHtmlBlock from "./blocks/RawHtmlBlock";
 import TextBlock from "./blocks/TextBlock";
 import ImageBlock from "./blocks/ImageBlock";
+import VariationContainerBlock from "./blocks/VariationContainerBlock";
 
 export type BlockComponentProps = {
   data: BlockData;
@@ -52,6 +53,7 @@ export const blockRegistry: Record<string, BlockComponent> = register({
   RawHtmlBlock,
   TextBlock,
   ImageBlock,
+  VariationContainerBlock,
 });
 
 /**

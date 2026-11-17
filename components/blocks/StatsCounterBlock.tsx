@@ -173,25 +173,44 @@ export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponent
       }
     };
 
+    // The first callback reports the stat's position at hydration. A stat that is
+    // already on screen keeps its real, server-rendered value (no flash to 0); only
+    // one still off-screen is reset to 0 and counts up when it scrolls into view.
+    let armed = false;
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          observer.disconnect();
-          // Reset here rather than in the effect body: a synchronous setState in an
-          // effect body triggers a cascading render.
+        const entry = entries[entries.length - 1];
+        if (!entry) return;
+        if (!armed) {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            return;
+          }
+          armed = true;
           setProgress(0);
-          startedAt = null;
-          frame = window.requestAnimationFrame(step);
-          break;
+          return;
         }
+        if (!entry.isIntersecting || entry.intersectionRatio < VISIBILITY_THRESHOLD) return;
+        observer.disconnect();
+        startedAt = null;
+        frame = window.requestAnimationFrame(step);
       },
-      { threshold: VISIBILITY_THRESHOLD },
+      { threshold: [0, VISIBILITY_THRESHOLD] },
     );
+
+    // Printing an off-screen, not-yet-counted stat must still show the real value.
+    const showFinal = () => {
+      observer.disconnect();
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+      frame = 0;
+      setProgress(1);
+    };
+    window.addEventListener("beforeprint", showFinal);
 
     observer.observe(node);
 
     return () => {
+      window.removeEventListener("beforeprint", showFinal);
       observer.disconnect();
       if (frame !== 0) window.cancelAnimationFrame(frame);
     };

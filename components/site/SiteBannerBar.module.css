@@ -18,9 +18,10 @@
 
 .inner {
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding: var(--ob-space-2) var(--ob-space-3);
+  padding: var(--ob-space-2) var(--ob-gutter);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -132,12 +133,6 @@
 .bar[data-variant="warning"] .link:focus-visible,
 .bar[data-variant="alert"] .link:focus-visible {
   outline-color: var(--ob-brand-ink);
-}
-
-@media (min-width: 720px) {
-  .inner {
-    padding-inline: var(--ob-space-5);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

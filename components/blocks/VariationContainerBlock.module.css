@@ -1,0 +1,19 @@
+/* Stacks the chosen variation's blocks with the page's rhythm. Each child block
+   brings its own styling; this only spaces them. */
+.variation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-5);
+  width: 100%;
+  min-width: 0;
+}
+
+.item {
+  min-width: 0;
+}
+
+/* The variation container adds no gutter of its own: every block it renders
+   applies the shared content box (var(--ob-gutter)) itself. */
+.gutter {
+  padding-inline: 0;
+}

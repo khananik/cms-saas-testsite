@@ -10,123 +10,214 @@
    Inventory source: the harvested live-instance settings list. Nothing
    here is invented; every selector matches a value actually observed.
 
-   COLOUR APPROXIMATIONS
-   ---------------------
-   We do not have the official Optimizely brand values, so the branded
-   surfaces — opal, blueGrad, purple and brand — are tasteful, WCAG-AA
-   approximations. To correct them, edit ONLY the :root tokens below
-   (and their dark-mode counterparts); no rule hardcodes a colour:
-     --ob-bg-opal / --ob-fg-opal
-     --ob-bg-bluegrad-a / --ob-bg-bluegrad-b / --ob-fg-bluegrad
-     --ob-bg-purple / --ob-fg-purple
-     --ob-bg-brand  / --ob-fg-brand
-   Each surface also owns -muted, -border and -accent tokens so that
-   secondary text, rules and links stay readable on it.
+   SURFACES
+   --------
+   Every background value maps onto the Mosey brand palette defined in
+   globals.css (--ob-brand-*, --ob-n*). Each surface owns a full token
+   set (bg, fg, muted, border, accent, accent-fg, card, surface), and a
+   painted wrapper re-points the shared --ob-* tokens at that set, so
+   blocks nested inside stay readable without knowing the surface.
+
+     light  : white, offwhite, opal, bluegrad (brand-blue tint),
+              purple (brand-pink tint) — dark fir ink, fir accent.
+     dark   : brand (mid fir), dark (dark fir) — light ink, lfgreen accent.
+
+   Contrast (computed, WCAG 2.x):
+     fir #197d5f on white 5.07:1. On every TINTED light surface plain fir
+     drops to 4.3–4.6:1, so those use --ob-accent-deep (fir 80% + ink,
+     #146b51): 5.5–5.9:1 on offwhite, opal stops, blue and pink tints.
+     ink on any light surface >= 13.9:1; muted #56604b >= 5.6:1.
+     n2 on dark fir 14.9:1, on mid fir 11.6:1; n5 muted 10.0 / 7.8:1;
+     lfgreen accent 13.4 / 10.5:1.
    ============================================================ */
 
 :root {
-  /* --- Plain surfaces --- */
+  /* --- Shared derived brand values --- */
+  /* Fir deepened just enough to clear 4.5:1 on tinted light surfaces. */
+  --ob-accent-deep: color-mix(in srgb, var(--ob-brand-fir) 80%, var(--ob-brand-ink));
+  /* Hairline for dark surfaces: a light-ink line at low strength. */
+  --ob-border-on-dark: color-mix(in srgb, var(--ob-n2) 16%, transparent);
+
+  /* --- Vertical rhythm ---
+     One gap between page-level bands. Blocks that paint their own band
+     (customer voices, logo grid, FAQ, testimonial) already pad by
+     --ob-space-6, so sections match it and the page reads as one beat. */
+  --ob-rhythm: var(--ob-space-6);
+  --ob-rhythm-lg: calc(var(--ob-space-6) + var(--ob-space-4));
+
+  /* --- Opal: the Optimizely brand surface ---
+     The stops are the CMS's own authored values — the one sanctioned set
+     of raw colours in this file. Defined once here. */
+  --ob-opal-1: #ffffff;
+  --ob-opal-2: #f8fafc;
+  --ob-opal-3: #f3e8ff;
+  --ob-opal-4: #e0f2fe;
+  --ob-opal-5: #ecfdf5;
+  --ob-opal-gradient: linear-gradient(
+    120deg,
+    var(--ob-opal-1),
+    var(--ob-opal-2),
+    var(--ob-opal-3),
+    var(--ob-opal-4),
+    var(--ob-opal-5),
+    var(--ob-opal-1)
+  );
+  /* Vibrant accent gradient for emphasis text on opal (decorative use
+     only: clip it to large display text, never body copy). */
+  --ob-opal-a1: #a855f7;
+  --ob-opal-a2: #ec4899;
+  --ob-opal-a3: #06b6d4;
+  --ob-opal-a4: #10b981;
+  --ob-opal-emphasis: linear-gradient(
+    to right,
+    var(--ob-opal-a1),
+    var(--ob-opal-a2),
+    var(--ob-opal-a3),
+    var(--ob-opal-a4),
+    var(--ob-opal-a1)
+  );
+
+  /* --- Light surfaces: dark fir ink, fir accents --- */
   --ob-bg-white: #ffffff;
-  --ob-fg-white: #14181f;
-  --ob-muted-white: #5b6472;
-  --ob-border-white: #dfe4ec;
-  --ob-accent-white: #0b5fff;
+  --ob-fg-white: var(--ob-brand-ink);
+  --ob-muted-white: #56604b;
+  --ob-border-white: var(--ob-n4);
+  --ob-accent-white: var(--ob-brand-fir);
+  --ob-accentfg-white: #ffffff;
+  --ob-card-white: #ffffff;
+  --ob-surface-white: var(--ob-n2);
 
-  --ob-bg-offwhite: #f5f7fa;
-  --ob-fg-offwhite: #14181f;
-  --ob-muted-offwhite: #5b6472;
-  --ob-border-offwhite: #d9e0ea;
-  --ob-accent-offwhite: #0b5fff;
+  --ob-bg-offwhite: var(--ob-n2);
+  --ob-fg-offwhite: var(--ob-brand-ink);
+  --ob-muted-offwhite: #56604b;
+  --ob-border-offwhite: var(--ob-n4);
+  --ob-accent-offwhite: var(--ob-accent-deep);
+  --ob-accentfg-offwhite: #ffffff;
+  --ob-card-offwhite: #ffffff;
+  --ob-surface-offwhite: var(--ob-n3);
 
-  /* --- Branded surfaces (approximations — see header) --- */
-  --ob-bg-opal: #dff1ee;
-  --ob-fg-opal: #0f2420;
-  --ob-muted-opal: #3f5a55;
-  --ob-border-opal: #bcddd7;
-  --ob-accent-opal: #0a5a4e;
+  --ob-bg-opal: var(--ob-opal-gradient);
+  --ob-fg-opal: var(--ob-brand-ink);
+  --ob-muted-opal: #56604b;
+  --ob-border-opal: var(--ob-n4);
+  --ob-accent-opal: var(--ob-accent-deep);
+  --ob-accentfg-opal: #ffffff;
+  --ob-card-opal: #ffffff;
+  --ob-surface-opal: color-mix(in srgb, #ffffff 70%, transparent);
 
-  --ob-bg-bluegrad-a: #e7efff;
-  --ob-bg-bluegrad-b: #f1ecff;
-  --ob-fg-bluegrad: #121a2e;
-  --ob-muted-bluegrad: #46506b;
-  --ob-border-bluegrad: #cdd8f2;
-  --ob-accent-bluegrad: #1a46c8;
+  /* bluegrad: no brand equivalent, so a brand-blue tinted wash. */
+  --ob-bg-bluegrad-a: color-mix(in srgb, var(--ob-brand-blue) 28%, #ffffff);
+  --ob-bg-bluegrad-b: color-mix(in srgb, var(--ob-brand-blue) 10%, #ffffff);
+  --ob-fg-bluegrad: var(--ob-brand-ink);
+  --ob-muted-bluegrad: #56604b;
+  --ob-border-bluegrad: color-mix(in srgb, var(--ob-brand-blue) 55%, #ffffff);
+  --ob-accent-bluegrad: var(--ob-accent-deep);
+  --ob-accentfg-bluegrad: #ffffff;
+  --ob-card-bluegrad: #ffffff;
+  --ob-surface-bluegrad: color-mix(in srgb, #ffffff 70%, transparent);
 
-  --ob-bg-purple: #3a1d6e;
-  --ob-fg-purple: #ffffff;
-  --ob-muted-purple: #d6c9ef;
-  --ob-border-purple: #57399069;
-  --ob-accent-purple: #cbb6ff;
+  /* purple: no brand equivalent, so a brand-pink tinted wash. */
+  --ob-bg-purple: color-mix(in srgb, var(--ob-brand-pink) 18%, #ffffff);
+  --ob-fg-purple: var(--ob-brand-ink);
+  --ob-muted-purple: #56604b;
+  --ob-border-purple: color-mix(in srgb, var(--ob-brand-pink) 45%, #ffffff);
+  --ob-accent-purple: var(--ob-accent-deep);
+  --ob-accentfg-purple: #ffffff;
+  --ob-card-purple: #ffffff;
+  --ob-surface-purple: color-mix(in srgb, #ffffff 70%, transparent);
 
-  --ob-bg-brand: #10224a;
-  --ob-fg-brand: #ffffff;
-  --ob-muted-brand: #c3cee4;
-  --ob-border-brand: #2c3f6e;
-  --ob-accent-brand: #9fc2ff;
+  /* --- Dark surfaces: light ink, lfgreen accent --- */
+  --ob-bg-brand: var(--ob-brand-ink-2);
+  --ob-fg-brand: var(--ob-n2);
+  --ob-muted-brand: var(--ob-n5);
+  --ob-border-brand: var(--ob-border-on-dark);
+  --ob-accent-brand: var(--ob-brand-bright);
+  --ob-accentfg-brand: var(--ob-brand-ink);
+  --ob-card-brand: var(--ob-brand-ink);
+  --ob-surface-brand: var(--ob-brand-ink);
 
-  --ob-bg-dark: #14181f;
-  --ob-fg-dark: #eef1f6;
-  --ob-muted-dark: #a9b3c2;
-  --ob-border-dark: #2f3742;
-  --ob-accent-dark: #8fb6ff;
+  --ob-bg-dark: var(--ob-brand-ink);
+  --ob-fg-dark: var(--ob-n2);
+  --ob-muted-dark: var(--ob-n5);
+  --ob-border-dark: var(--ob-border-on-dark);
+  --ob-accent-dark: var(--ob-brand-bright);
+  --ob-accentfg-dark: var(--ob-brand-ink);
+  --ob-card-dark: var(--ob-brand-ink-2);
+  --ob-surface-dark: var(--ob-brand-ink-2);
 
   /* Decorative only (headlineStyle: extruded) */
-  --ob-extrude: #3a1d6e;
+  --ob-extrude: var(--ob-brand-grass);
 }
 
-/* Dark mode — same pattern globals.css already uses. Light surfaces are
-   re-tuned rather than left bright, so a page never flashes white panels. */
+@media (max-width: 30rem) {
+  :root {
+    --ob-rhythm: var(--ob-space-5);
+    --ob-rhythm-lg: var(--ob-space-6);
+  }
+}
+
 /*
  * Dark surface tokens — OPT-IN only, matching globals.css.
  * The CMS authors a light design, so the page must not flip on
  * prefers-color-scheme. Set data-theme="dark" on <html> to use these.
+ * Light surfaces become the brand's fir darks; accents become lfgreen.
  */
 :root[data-theme="dark"] {
-    --ob-bg-white: #161b23;
-    --ob-fg-white: #eef1f6;
-    --ob-muted-white: #a3adbd;
-    --ob-border-white: #2a313c;
-    --ob-accent-white: #6ea0ff;
+  --ob-bg-white: var(--ob-brand-ink);
+  --ob-fg-white: var(--ob-n2);
+  --ob-muted-white: var(--ob-n5);
+  --ob-border-white: var(--ob-border-on-dark);
+  --ob-accent-white: var(--ob-brand-bright);
+  --ob-accentfg-white: var(--ob-brand-ink);
+  --ob-card-white: var(--ob-brand-ink-2);
+  --ob-surface-white: var(--ob-brand-ink-2);
 
-    --ob-bg-offwhite: #12161d;
-    --ob-fg-offwhite: #eef1f6;
-    --ob-muted-offwhite: #a3adbd;
-    --ob-border-offwhite: #262d38;
-    --ob-accent-offwhite: #6ea0ff;
+  --ob-bg-offwhite: var(--ob-brand-ink-2);
+  --ob-fg-offwhite: var(--ob-n2);
+  --ob-muted-offwhite: var(--ob-n5);
+  --ob-border-offwhite: var(--ob-border-on-dark);
+  --ob-accent-offwhite: var(--ob-brand-bright);
+  --ob-accentfg-offwhite: var(--ob-brand-ink);
+  --ob-card-offwhite: var(--ob-brand-ink);
+  --ob-surface-offwhite: var(--ob-brand-ink);
 
-    --ob-bg-opal: #12302c;
-    --ob-fg-opal: #e6f5f1;
-    --ob-muted-opal: #a8c9c2;
-    --ob-border-opal: #264a44;
-    --ob-accent-opal: #7fd9c7;
+  --ob-bg-opal: linear-gradient(
+    120deg,
+    var(--ob-brand-ink),
+    color-mix(in srgb, var(--ob-opal-3) 10%, var(--ob-brand-ink)),
+    color-mix(in srgb, var(--ob-opal-4) 10%, var(--ob-brand-ink)),
+    var(--ob-brand-ink-2),
+    var(--ob-brand-ink)
+  );
+  --ob-fg-opal: var(--ob-n2);
+  --ob-muted-opal: var(--ob-n5);
+  --ob-border-opal: var(--ob-border-on-dark);
+  --ob-accent-opal: var(--ob-brand-bright);
+  --ob-accentfg-opal: var(--ob-brand-ink);
+  --ob-card-opal: var(--ob-brand-ink-2);
+  --ob-surface-opal: var(--ob-brand-ink-2);
 
-    --ob-bg-bluegrad-a: #141d33;
-    --ob-bg-bluegrad-b: #1e1b33;
-    --ob-fg-bluegrad: #eef1f6;
-    --ob-muted-bluegrad: #aab4ca;
-    --ob-border-bluegrad: #2b3350;
-    --ob-accent-bluegrad: #9fc2ff;
+  --ob-bg-bluegrad-a: color-mix(in srgb, var(--ob-brand-blue) 14%, var(--ob-brand-ink));
+  --ob-bg-bluegrad-b: var(--ob-brand-ink);
+  --ob-fg-bluegrad: var(--ob-n2);
+  --ob-muted-bluegrad: var(--ob-n5);
+  --ob-border-bluegrad: var(--ob-border-on-dark);
+  --ob-accent-bluegrad: var(--ob-brand-bright);
+  --ob-accentfg-bluegrad: var(--ob-brand-ink);
+  --ob-card-bluegrad: var(--ob-brand-ink-2);
+  --ob-surface-bluegrad: var(--ob-brand-ink-2);
 
-    --ob-bg-purple: #2a1552;
-    --ob-fg-purple: #f4efff;
-    --ob-muted-purple: #c9b9e8;
-    --ob-border-purple: #42286f;
-    --ob-accent-purple: #cbb6ff;
+  --ob-bg-purple: color-mix(in srgb, var(--ob-brand-pink) 12%, var(--ob-brand-ink));
+  --ob-fg-purple: var(--ob-n2);
+  --ob-muted-purple: var(--ob-n5);
+  --ob-border-purple: var(--ob-border-on-dark);
+  --ob-accent-purple: var(--ob-brand-bright);
+  --ob-accentfg-purple: var(--ob-brand-ink);
+  --ob-card-purple: var(--ob-brand-ink-2);
+  --ob-surface-purple: var(--ob-brand-ink-2);
 
-    --ob-bg-brand: #0c1935;
-    --ob-fg-brand: #eef1f6;
-    --ob-muted-brand: #b2bed6;
-    --ob-border-brand: #22314f;
-    --ob-accent-brand: #9fc2ff;
-
-    --ob-bg-dark: #0a0d12;
-    --ob-fg-dark: #eef1f6;
-    --ob-muted-dark: #a9b3c2;
-    --ob-border-dark: #252c36;
-    --ob-accent-dark: #8fb6ff;
-
-    --ob-extrude: #cbb6ff;
-  }
+  --ob-extrude: var(--ob-brand-fir);
+}
 
 /* ============================================================
    1. Wrapper baselines
@@ -165,8 +256,10 @@
 
 /* ============================================================
    2. background — sections, columns and component nodes
-   Each value redefines the local colour tokens, so descendants
-   (headings, body copy, borders, links) inherit a readable set.
+   Each value re-points the shared colour tokens at its surface set,
+   so descendants (headings, body copy, borders, links, nested cards)
+   inherit a readable set. One rule per surface: the value list is the
+   only thing that varies.
    ============================================================ */
 
 .ob-section[data-ob-background="transparent"],
@@ -175,123 +268,224 @@
   background: transparent;
 }
 
-.ob-section[data-ob-background="white"],
-.ob-column[data-ob-background="white"],
-.ob-node[data-ob-background="white"] {
-  --ob-fg: var(--ob-fg-white);
-  --ob-muted: var(--ob-muted-white);
-  --ob-border: var(--ob-border-white);
-  --ob-accent: var(--ob-accent-white);
-  background: var(--ob-bg-white);
-  color: var(--ob-fg-white);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="white"] {
+  --ob-s-bg: var(--ob-bg-white);
+  --ob-s-fg: var(--ob-fg-white);
+  --ob-s-muted: var(--ob-muted-white);
+  --ob-s-border: var(--ob-border-white);
+  --ob-s-accent: var(--ob-accent-white);
+  --ob-s-accentfg: var(--ob-accentfg-white);
+  --ob-s-card: var(--ob-card-white);
+  --ob-s-surface: var(--ob-surface-white);
 }
 
-.ob-section[data-ob-background="offwhite"],
-.ob-column[data-ob-background="offwhite"],
-.ob-node[data-ob-background="offwhite"] {
-  --ob-fg: var(--ob-fg-offwhite);
-  --ob-muted: var(--ob-muted-offwhite);
-  --ob-border: var(--ob-border-offwhite);
-  --ob-accent: var(--ob-accent-offwhite);
-  background: var(--ob-bg-offwhite);
-  color: var(--ob-fg-offwhite);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="offwhite"] {
+  --ob-s-bg: var(--ob-bg-offwhite);
+  --ob-s-fg: var(--ob-fg-offwhite);
+  --ob-s-muted: var(--ob-muted-offwhite);
+  --ob-s-border: var(--ob-border-offwhite);
+  --ob-s-accent: var(--ob-accent-offwhite);
+  --ob-s-accentfg: var(--ob-accentfg-offwhite);
+  --ob-s-card: var(--ob-card-offwhite);
+  --ob-s-surface: var(--ob-surface-offwhite);
 }
 
-.ob-section[data-ob-background="opal"],
-.ob-column[data-ob-background="opal"],
-.ob-node[data-ob-background="opal"] {
-  --ob-fg: var(--ob-fg-opal);
-  --ob-muted: var(--ob-muted-opal);
-  --ob-border: var(--ob-border-opal);
-  --ob-accent: var(--ob-accent-opal);
-  background: var(--ob-bg-opal);
-  color: var(--ob-fg-opal);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="opal"] {
+  --ob-s-bg: var(--ob-bg-opal);
+  --ob-s-fg: var(--ob-fg-opal);
+  --ob-s-muted: var(--ob-muted-opal);
+  --ob-s-border: var(--ob-border-opal);
+  --ob-s-accent: var(--ob-accent-opal);
+  --ob-s-accentfg: var(--ob-accentfg-opal);
+  --ob-s-card: var(--ob-card-opal);
+  --ob-s-surface: var(--ob-surface-opal);
 }
 
-.ob-section[data-ob-background="bluegrad"],
-.ob-column[data-ob-background="bluegrad"],
-.ob-node[data-ob-background="bluegrad"] {
-  --ob-fg: var(--ob-fg-bluegrad);
-  --ob-muted: var(--ob-muted-bluegrad);
-  --ob-border: var(--ob-border-bluegrad);
-  --ob-accent: var(--ob-accent-bluegrad);
-  background-color: var(--ob-bg-bluegrad-a);
-  background-image: linear-gradient(135deg, var(--ob-bg-bluegrad-a), var(--ob-bg-bluegrad-b));
-  color: var(--ob-fg-bluegrad);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="bluegrad"] {
+  --ob-s-bg: linear-gradient(135deg, var(--ob-bg-bluegrad-a), var(--ob-bg-bluegrad-b));
+  --ob-s-fg: var(--ob-fg-bluegrad);
+  --ob-s-muted: var(--ob-muted-bluegrad);
+  --ob-s-border: var(--ob-border-bluegrad);
+  --ob-s-accent: var(--ob-accent-bluegrad);
+  --ob-s-accentfg: var(--ob-accentfg-bluegrad);
+  --ob-s-card: var(--ob-card-bluegrad);
+  --ob-s-surface: var(--ob-surface-bluegrad);
 }
 
-.ob-section[data-ob-background="purple"],
-.ob-column[data-ob-background="purple"],
-.ob-node[data-ob-background="purple"] {
-  --ob-fg: var(--ob-fg-purple);
-  --ob-muted: var(--ob-muted-purple);
-  --ob-border: var(--ob-border-purple);
-  --ob-accent: var(--ob-accent-purple);
-  background: var(--ob-bg-purple);
-  color: var(--ob-fg-purple);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="purple"] {
+  --ob-s-bg: var(--ob-bg-purple);
+  --ob-s-fg: var(--ob-fg-purple);
+  --ob-s-muted: var(--ob-muted-purple);
+  --ob-s-border: var(--ob-border-purple);
+  --ob-s-accent: var(--ob-accent-purple);
+  --ob-s-accentfg: var(--ob-accentfg-purple);
+  --ob-s-card: var(--ob-card-purple);
+  --ob-s-surface: var(--ob-surface-purple);
 }
 
-.ob-section[data-ob-background="brand"],
-.ob-column[data-ob-background="brand"],
-.ob-node[data-ob-background="brand"] {
-  --ob-fg: var(--ob-fg-brand);
-  --ob-muted: var(--ob-muted-brand);
-  --ob-border: var(--ob-border-brand);
-  --ob-accent: var(--ob-accent-brand);
-  background: var(--ob-bg-brand);
-  color: var(--ob-fg-brand);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="brand"] {
+  --ob-s-bg: var(--ob-bg-brand);
+  --ob-s-fg: var(--ob-fg-brand);
+  --ob-s-muted: var(--ob-muted-brand);
+  --ob-s-border: var(--ob-border-brand);
+  --ob-s-accent: var(--ob-accent-brand);
+  --ob-s-accentfg: var(--ob-accentfg-brand);
+  --ob-s-card: var(--ob-card-brand);
+  --ob-s-surface: var(--ob-surface-brand);
 }
 
-.ob-section[data-ob-background="dark"],
-.ob-column[data-ob-background="dark"],
-.ob-node[data-ob-background="dark"] {
-  --ob-fg: var(--ob-fg-dark);
-  --ob-muted: var(--ob-muted-dark);
-  --ob-border: var(--ob-border-dark);
-  --ob-accent: var(--ob-accent-dark);
-  background: var(--ob-bg-dark);
-  color: var(--ob-fg-dark);
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="dark"] {
+  --ob-s-bg: var(--ob-bg-dark);
+  --ob-s-fg: var(--ob-fg-dark);
+  --ob-s-muted: var(--ob-muted-dark);
+  --ob-s-border: var(--ob-border-dark);
+  --ob-s-accent: var(--ob-accent-dark);
+  --ob-s-accentfg: var(--ob-accentfg-dark);
+  --ob-s-card: var(--ob-card-dark);
+  --ob-s-surface: var(--ob-surface-dark);
 }
 
-/* A painted surface needs breathing room and must not bleed its text to
-   the viewport edge; the measure is restored in §6 (width / maxWidth). */
-.ob-section[data-ob-background]:not([data-ob-background="transparent"]),
+/* Every painted surface: apply the set chosen above. --ob-bg becomes the
+   CARD colour (blocks paint cards with it) and --ob-surface the tint a
+   block may lay over the band, so nested cards stay readable on dark. */
+:is(.ob-section, .ob-column, .ob-node):is(
+    [data-ob-background="white"],
+    [data-ob-background="offwhite"],
+    [data-ob-background="opal"],
+    [data-ob-background="bluegrad"],
+    [data-ob-background="purple"],
+    [data-ob-background="brand"],
+    [data-ob-background="dark"]
+  ) {
+  --ob-fg: var(--ob-s-fg);
+  --ob-muted: var(--ob-s-muted);
+  --ob-border: var(--ob-s-border);
+  --ob-accent: var(--ob-s-accent);
+  --ob-accent-fg: var(--ob-s-accentfg);
+  --ob-bg: var(--ob-s-card);
+  --ob-surface: var(--ob-s-surface);
+  background: var(--ob-s-bg);
+  color: var(--ob-s-fg);
+}
+
+/* Opal drifts slowly, exactly as the CMS's own opal surface does. The
+   keyframes are namespaced (ob-opal-flow) so they never collide with the
+   authored markup's own `opal-flow`. */
+:is(.ob-section, .ob-column, .ob-node)[data-ob-background="opal"] {
+  background-size: 300% 300%;
+  animation: ob-opal-flow 15s ease infinite;
+}
+
+@keyframes ob-opal-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.ob-section, .ob-column, .ob-node)[data-ob-background="opal"] {
+    animation: none;
+    background-position: 0% 50%;
+  }
+}
+
+/* --- Full-bleed bands ---
+   A painted SECTION runs edge to edge; its content column (BlankSection's
+   container: the canonical content box, --ob-maxw with --ob-gutter inside
+   it) keeps the measure.
+   A painted TOP-LEVEL component node (directly under the page, not inside
+   a section or column) is likewise a band: no inline padding, so the
+   block's own surface reaches both viewport edges. Every such block
+   constrains its own content to the content box (--ob-maxw, --ob-gutter
+   inside it). */
+.ob-section[data-ob-background],
+.ob-node[data-ob-background]:not(:is(.ob-section, .ob-column) *) {
+  padding-inline: 0;
+}
+
+/* Painted cards INSIDE a layout (a column, or a node within a column)
+   need breathing room so text never touches their painted edge. */
 .ob-column[data-ob-background]:not([data-ob-background="transparent"]),
-.ob-node[data-ob-background]:not([data-ob-background="transparent"]) {
+:is(.ob-section, .ob-column) .ob-node[data-ob-background]:not([data-ob-background="transparent"]) {
   padding-inline: var(--ob-space-3);
 }
 
-/* A full-bleed section keeps its rows within the measure. */
-.ob-section > .ob-row {
-  max-width: var(--ob-maxw);
-  margin-inline: auto;
+/* ...but a WHITE node or column on an unpainted page is the page's own
+   surface (--ob-bg is white): it shows no card edge, so an inset there only
+   pushes its content off the shared content edge. It keeps the inset when it
+   sits on a tinted or dark band, where it does read as a card. */
+:is(.ob-column, .ob-node)[data-ob-background="white"]:not(
+    :is(.ob-section, .ob-column, .ob-node):is(
+        [data-ob-background="offwhite"],
+        [data-ob-background="opal"],
+        [data-ob-background="bluegrad"],
+        [data-ob-background="purple"],
+        [data-ob-background="brand"],
+        [data-ob-background="dark"]
+      )
+      *
+  ) {
+  padding-inline: 0;
 }
 
-/* textColor: auto — inherit whatever the surface above decided. */
+/* Adjacent painted bands butt together cleanly. The hairlines that
+   showed at band tops came from the BLOCKS' own border-block, not from
+   any wrapper (so `divider: none`, which only clears the section's own
+   border, never reached them). A top-level painted band is already
+   delimited by its colour change, so its root block drops those edges.
+   Scoped to the block's root element and never into .ob-raw. */
+.ob-node[data-ob-background]:not([data-ob-background="transparent"]):not(:is(.ob-section, .ob-column) *)
+  > :not(.ob-raw) {
+  border-block-width: 0;
+}
+
+/* A row placed directly in a section (no container between them) becomes
+   the content box itself, and — like the section container — resets the
+   gutter for what it holds so nested blocks never pad twice. */
+.ob-section > .ob-row {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
+}
+
+.ob-section > .ob-row > * {
+  --ob-gutter: 0px;
+}
+
+/* textColor: auto — use the ink of whatever surface applies: the node's
+   own when it is painted, otherwise the nearest painted ancestor's
+   (--ob-fg is re-pointed by every surface above). `inherit` here used to
+   override a dark surface's light ink with the page's dark ink. */
 .ob-section[data-ob-textcolor="auto"],
 .ob-column[data-ob-textcolor="auto"],
 .ob-node[data-ob-textcolor="auto"] {
-  color: inherit;
+  color: var(--ob-fg);
 }
-
 /* ============================================================
    3. Typography — headingSize, textSize, fontStyle, headlineStyle
    Heading rules are scoped to the node's own descendants.
    ============================================================ */
 
-.ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3) {
+.ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3):not(.ob-raw *) {
   font-size: clamp(2rem, 1.3rem + 3.2vw, 3.25rem);
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
-.ob-node[data-ob-headingsize="lg"] :is(h1, h2, h3) {
+.ob-node[data-ob-headingsize="lg"] :is(h1, h2, h3):not(.ob-raw *) {
   font-size: clamp(1.625rem, 1.2rem + 1.9vw, 2.375rem);
   letter-spacing: -0.015em;
   line-height: 1.15;
 }
 
-.ob-node[data-ob-headingsize="md"] :is(h1, h2, h3) {
+.ob-node[data-ob-headingsize="md"] :is(h1, h2, h3):not(.ob-raw *) {
   font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
   letter-spacing: -0.01em;
   line-height: 1.25;
@@ -317,7 +511,7 @@
 }
 
 /* headlineStyle: extruded — the layered-shadow display treatment. */
-.ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+.ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2):not(.ob-raw *) {
   text-shadow:
     1px 1px 0 var(--ob-extrude),
     2px 2px 0 var(--ob-extrude),
@@ -326,7 +520,7 @@
 }
 
 @media (prefers-contrast: more) {
-  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2):not(.ob-raw *) {
     text-shadow: none;
   }
 }
@@ -364,13 +558,25 @@
   padding-block: 0;
 }
 
+/* One rhythm: --ob-rhythm (64px, 40px on phones) matches the padding
+   the band-painting blocks already use, so every page-level gap is equal. */
 .ob-section[data-ob-paddingy="default"],
 .ob-node[data-ob-verticalpadding="default"] {
-  padding-block: var(--ob-space-5);
+  padding-block: var(--ob-rhythm);
 }
 
 .ob-section[data-ob-paddingy="large"] {
-  padding-block: var(--ob-space-6);
+  padding-block: var(--ob-rhythm-lg);
+}
+
+/* paddingY: none is honoured literally: the blocks inside such sections
+   (testimonial, stats, product cards) carry their own band padding, so
+   adding a rhythm step here would double the gap. */
+
+/* A section whose blocks all rendered nothing (e.g. a block with no
+   published content) collapses instead of leaving a padded dead gap. */
+.ob-section:not(:has(.ob-column > :not(:empty))) {
+  padding-block: 0;
 }
 
 .ob-column[data-ob-padding="none"] {
@@ -399,26 +605,32 @@
   margin-inline: 0;
 }
 
+/* contained / wide cap the node's box only; the block inside supplies the
+   gutter (var(--ob-gutter)), so the content edge is the same as any other
+   block's. No horizontal padding here — that would offset the edge. */
 .ob-node[data-ob-width="contained"],
 .ob-node[data-ob-contentwidth="default"] {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
 }
 
 .ob-node[data-ob-width="wide"] {
+  box-sizing: border-box;
   width: 100%;
   max-width: min(100%, calc(var(--ob-maxw) + 15rem));
   margin-inline: auto;
 }
 
 .ob-row[data-ob-maxwidth="default"] {
+  box-sizing: border-box;
   max-width: var(--ob-maxw);
   margin-inline: auto;
 }
 
-/* fullWidth / full — edge to edge, but still padded so text never
-   touches the viewport edge at 360px. */
+/* fullWidth / full — edge to edge. Text stays off the viewport edge via
+   the section container's gutter (--ob-gutter). */
 .ob-row[data-ob-maxwidth="fullwidth"],
 .ob-row[data-ob-maxwidth="full"] {
   max-width: none;
@@ -486,11 +698,11 @@
    9. Media — aspectRatio, columns, height, size, fullColor
    ============================================================ */
 
-.ob-node[data-ob-aspectratio="auto"] :is(img, video, iframe) {
+.ob-node[data-ob-aspectratio="auto"] :is(img, video, iframe):not(.ob-raw *) {
   aspect-ratio: auto;
 }
 
-.ob-node[data-ob-aspectratio="r16x9"] :is(img, video, iframe) {
+.ob-node[data-ob-aspectratio="r16x9"] :is(img, video, iframe):not(.ob-raw *) {
   aspect-ratio: 16 / 9;
   width: 100%;
   object-fit: cover;
@@ -512,11 +724,11 @@
 }
 
 /* fullColor is purely visual: colour imagery vs. a monochrome treatment. */
-.ob-node[data-ob-fullcolor="true"] :is(img, svg) {
+.ob-node[data-ob-fullcolor="true"] :is(img, svg):not(.ob-raw *) {
   filter: none;
 }
 
-.ob-node[data-ob-fullcolor="false"] :is(img, svg) {
+.ob-node[data-ob-fullcolor="false"] :is(img, svg):not(.ob-raw *) {
   filter: grayscale(1);
   opacity: 0.75;
 }
@@ -536,12 +748,8 @@
     width: 100%;
   }
 
-  .ob-section[data-ob-paddingy="large"] {
-    padding-block: var(--ob-space-5);
-  }
-
-  .ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3),
-  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+  .ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3):not(.ob-raw *),
+  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2):not(.ob-raw *) {
     overflow-wrap: break-word;
     hyphens: auto;
   }

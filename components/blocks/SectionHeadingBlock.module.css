@@ -1,18 +1,25 @@
 .block {
   box-sizing: border-box;
   width: 100%;
-  /* Generous above, tighter below: the header binds to the content it introduces. */
-  padding: var(--ob-space-5) var(--ob-space-3) var(--ob-space-4);
+  /* Generous above, tight below: the header binds to the content it introduces.
+     The band has no side padding; .inner is the canonical content box, and its
+     var(--ob-gutter) is zeroed by the layout section when nested, so the heading
+     lines up with the hero copy and the header logo.
+     The small bottom padding also keeps an isolated heading (a section holding
+     only this block) from leaving a hole before the next section. */
+  padding: var(--ob-space-4) 0 var(--ob-space-2);
+  padding-inline: 0;
   color: var(--ob-fg);
 }
 
 .inner {
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
-  margin: 0 auto;
+  margin-inline: auto;
+  padding-inline: var(--ob-gutter);
   display: flex;
   flex-direction: column;
-  gap: var(--ob-space-2);
 }
 
 .alignLeft .inner {
@@ -33,9 +40,11 @@
 /* Decorative accent rule above the heading. aria-hidden in markup. */
 .rule {
   flex: none;
-  width: 48px;
+  width: 40px;
   height: 3px;
-  border-radius: 2px;
+  margin-bottom: var(--ob-space-3);
+  border-radius: 999px;
+  /* --ob-accent so the rule follows the surface (fir on light, its dark-theme value on dark). */
   background: var(--ob-accent);
 }
 
@@ -49,14 +58,16 @@
   line-height: 1.4;
   color: var(--ob-accent);
   overflow-wrap: anywhere;
+  margin-bottom: var(--ob-space-2);
 }
 
 .heading {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: clamp(1.75rem, 1.25rem + 2.2vw, 2.75rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  /* Fallback scale; the editor's headingSize display setting overrides it. */
+  font-size: clamp(1.75rem, 1.3rem + 1.9vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
   font-weight: 700;
   color: var(--ob-fg);
   max-width: 22ch;
@@ -69,9 +80,9 @@
 }
 
 .subheading {
-  margin: 0;
+  margin: var(--ob-space-3) 0 0;
   /* Constrained measure so the intro reads as one calm paragraph. */
-  max-width: 60ch;
+  max-width: 56ch;
   font-family: var(--ob-font);
   font-size: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
   line-height: 1.65;
@@ -149,14 +160,11 @@
 
 @media (min-width: 640px) {
   .block {
-    padding: var(--ob-space-6) var(--ob-space-4) var(--ob-space-5);
-  }
-
-  .inner {
-    gap: var(--ob-space-3);
+    padding: var(--ob-space-5) 0 var(--ob-space-3);
   }
 
   .rule {
-    width: 56px;
+    width: 48px;
+    margin-bottom: var(--ob-space-4);
   }
 }

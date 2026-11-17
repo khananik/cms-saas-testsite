@@ -13,7 +13,8 @@
   max-width: var(--ob-maxw);
   /* figure carries a browser default margin — reset it before centring. */
   margin: 0 auto;
-  padding: var(--ob-space-5) var(--ob-space-3);
+  padding-block: var(--ob-space-5);
+  padding-inline: var(--ob-gutter);
   background: var(--ob-bg);
   color: var(--ob-fg);
 }
@@ -71,7 +72,7 @@
 
 @media (min-width: 720px) {
   .block {
-    padding: var(--ob-space-6) var(--ob-space-3);
+    padding-block: var(--ob-space-6);
   }
 
   .caption {

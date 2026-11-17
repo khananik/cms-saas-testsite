@@ -27,6 +27,28 @@ function subscribeNever(): () => void {
 
 const GRID_MAX = 3;
 
+type SliderMetrics = {
+  /** Distance between the left edges of two neighbouring slides (slide + gap). */
+  step: number;
+  maxScroll: number;
+  /** Reachable snap positions, not slides: 3 visible of 6 gives 4. */
+  pageCount: number;
+  perView: number;
+  page: number;
+  atStart: boolean;
+  atEnd: boolean;
+};
+
+const INITIAL_METRICS: SliderMetrics = {
+  step: 0,
+  maxScroll: 0,
+  pageCount: 1,
+  perView: 1,
+  page: 0,
+  atStart: true,
+  atEnd: false,
+};
+
 const QUOTE_NAMES = ["text", "quote", "body", "testimonial", "statement", "content", "description"] as const;
 
 /** Cheap markup probe: this instance stores the quote as a plain sentence, but other
@@ -84,60 +106,77 @@ export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockCompone
   // false during SSR and the first client render, true afterwards. useSyncExternalStore
   // is the supported way to read "are we hydrated" without a setState inside an effect.
   const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [metrics, setMetrics] = useState<SliderMetrics>(INITIAL_METRICS);
 
-  const syncActiveIndex = useCallback(() => {
+  /** Reads the track geometry: one "page" is one slide plus the gap, and the number
+   *  of reachable snap positions follows from how far the track can actually scroll. */
+  const measure = useCallback(() => {
     const viewport = viewportRef.current;
-    if (viewport === null) return;
-    const centre = viewport.scrollLeft + viewport.clientWidth / 2;
-    let nearest = 0;
-    let smallest = Number.POSITIVE_INFINITY;
-    itemRefs.current.forEach((element, index) => {
-      if (element === null) return;
-      const itemCentre = element.offsetLeft + element.clientWidth / 2;
-      const distance = Math.abs(itemCentre - centre);
-      if (distance < smallest) {
-        smallest = distance;
-        nearest = index;
-      }
-    });
-    setActiveIndex(nearest);
+    const first = itemRefs.current[0];
+    const second = itemRefs.current[1];
+    if (viewport === null || first === null || first === undefined) return;
+    const step =
+      second !== null && second !== undefined
+        ? second.offsetLeft - first.offsetLeft
+        : first.offsetWidth;
+    if (step <= 0) return;
+    const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    const pageCount = Math.max(1, Math.ceil(maxScroll / step - 0.05) + 1);
+    const gap = Math.max(0, step - first.offsetWidth);
+    const perView = Math.max(1, Math.floor((viewport.clientWidth + gap) / step + 0.05));
+    const left = viewport.scrollLeft;
+    const atEnd = left >= maxScroll - 2;
+    const page = atEnd ? pageCount - 1 : Math.min(pageCount - 1, Math.round(left / step));
+    setMetrics((prev) =>
+      prev.step === step &&
+      prev.maxScroll === maxScroll &&
+      prev.pageCount === pageCount &&
+      prev.perView === perView &&
+      prev.page === page &&
+      prev.atStart === left <= 2 &&
+      prev.atEnd === atEnd
+        ? prev
+        : { step, maxScroll, pageCount, perView, page, atStart: left <= 2, atEnd },
+    );
   }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
     if (viewport === null || !isSlider) return;
     let frame = 0;
-    const onScroll = () => {
+    const schedule = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(syncActiveIndex);
+      frame = requestAnimationFrame(measure);
     };
-    viewport.addEventListener("scroll", onScroll, { passive: true });
-    syncActiveIndex();
+    viewport.addEventListener("scroll", schedule, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : undefined;
+    observer?.observe(viewport);
+    window.addEventListener("resize", schedule);
+    measure();
     return () => {
       cancelAnimationFrame(frame);
-      viewport.removeEventListener("scroll", onScroll);
+      viewport.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      observer?.disconnect();
     };
-  }, [isSlider, syncActiveIndex, voices.length]);
+  }, [isSlider, measure, voices.length]);
 
-  const goTo = useCallback(
+  const goToPage = useCallback(
     (index: number) => {
-      const clamped = Math.min(Math.max(index, 0), voices.length - 1);
-      const target = itemRefs.current[clamped];
       const viewport = viewportRef.current;
-      if (target === null || target === undefined || viewport === null) return;
+      if (viewport === null) return;
+      const clamped = Math.min(Math.max(index, 0), metrics.pageCount - 1);
       // Decided at call time: a CSS `scroll-behavior` override cannot suppress a
       // programmatic smooth scroll, so prefers-reduced-motion has to be read here.
       const prefersReducedMotion =
         typeof window.matchMedia === "function" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       viewport.scrollTo({
-        left: target.offsetLeft,
+        left: Math.min(clamped * metrics.step, metrics.maxScroll),
         behavior: prefersReducedMotion ? "auto" : "smooth",
       });
-      setActiveIndex(clamped);
     },
-    [voices.length],
+    [metrics.maxScroll, metrics.pageCount, metrics.step],
   );
 
   const onViewportKeyDown = useCallback(
@@ -145,20 +184,28 @@ export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockCompone
       if (!isSlider) return;
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        goTo(activeIndex + 1);
+        goToPage(metrics.page + 1);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        goTo(activeIndex - 1);
+        goToPage(metrics.page - 1);
       } else if (event.key === "Home") {
         event.preventDefault();
-        goTo(0);
+        goToPage(0);
       } else if (event.key === "End") {
         event.preventDefault();
-        goTo(voices.length - 1);
+        goToPage(metrics.pageCount - 1);
       }
     },
-    [activeIndex, goTo, isSlider, voices.length],
+    [goToPage, isSlider, metrics.page, metrics.pageCount],
   );
+
+  const pageLabel = (index: number): string => {
+    const first = index + 1;
+    const last = Math.min(voices.length, index + metrics.perView);
+    return first === last
+      ? `Show quote ${first} of ${voices.length}`
+      : `Show quotes ${first} to ${last} of ${voices.length}`;
+  };
 
   if (voices.length === 0) return null;
 
@@ -197,8 +244,9 @@ export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockCompone
         <div className={styles.viewportWrap}>
           <ul
             ref={viewportRef}
-            className={isSlider ? styles.track : styles.grid}
+            className={isSlider ? `${styles.track}${showControls ? ` ${styles.enhanced}` : ""}` : styles.grid}
             aria-live="polite"
+            aria-label={isSlider ? "Customer quotes" : undefined}
             tabIndex={isSlider ? 0 : undefined}
             onKeyDown={onViewportKeyDown}
           >
@@ -262,38 +310,43 @@ export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockCompone
 
         {showControls && (
           <div className={styles.controls}>
-            <button
-              type="button"
-              className={styles.arrow}
-              onClick={() => goTo(activeIndex - 1)}
-              disabled={activeIndex === 0}
-              aria-label="Previous customer quote"
-            >
-              <span aria-hidden="true">&#8592;</span>
-            </button>
-
-            <div className={styles.dots} role="group" aria-label="Choose a customer quote">
-              {voices.map((voice, index) => (
+            <div className={styles.dots} role="group" aria-label="Choose customer quotes">
+              {Array.from({ length: metrics.pageCount }, (_, index) => (
                 <button
-                  key={voice.key}
+                  key={index}
                   type="button"
                   className={styles.dot}
-                  onClick={() => goTo(index)}
-                  aria-current={index === activeIndex ? "true" : undefined}
-                  aria-label={`Quote ${index + 1} of ${voices.length}`}
+                  onClick={() => goToPage(index)}
+                  aria-current={index === metrics.page ? "true" : undefined}
+                  aria-label={pageLabel(index)}
                 />
               ))}
             </div>
 
-            <button
-              type="button"
-              className={styles.arrow}
-              onClick={() => goTo(activeIndex + 1)}
-              disabled={activeIndex === voices.length - 1}
-              aria-label="Next customer quote"
-            >
-              <span aria-hidden="true">&#8594;</span>
-            </button>
+            <div className={styles.arrows}>
+              <button
+                type="button"
+                className={styles.arrow}
+                onClick={() => goToPage(metrics.page - 1)}
+                disabled={metrics.atStart}
+                aria-label="Previous customer quote"
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                  <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className={styles.arrow}
+                onClick={() => goToPage(metrics.page + 1)}
+                disabled={metrics.atEnd}
+                aria-label="Next customer quote"
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                  <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
       </div>

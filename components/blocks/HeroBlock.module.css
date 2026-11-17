@@ -12,6 +12,21 @@
   --hero-fg-muted: var(--ob-n5);
   --hero-pop: var(--ob-brand-bright);
 
+  /* Opal brand palette, defined once here (sanctioned exception to "no raw
+     hex"). The 500-weight hues are the authored Opal accent stops and are
+     used only for decorative orbs. Text never uses them: on white they sit
+     at 2.1–4.0:1. The headline accent uses the 700 weights instead, which
+     hold >= 4.54:1 on every Opal stop (#fff, #f8fafc, #f3e8ff, #e0f2fe,
+     #ecfdf5) and on the current flat opal fill #dff1ee. */
+  --hero-opal-violet: #a855f7;
+  --hero-opal-pink: #ec4899;
+  --hero-opal-cyan: #06b6d4;
+  --hero-opal-emerald: #10b981;
+  --hero-opal-ink-violet: #7e22ce; /* 5.92:1 on #f3e8ff, 6.98:1 on #fff */
+  --hero-opal-ink-pink: #be185d;   /* 5.12:1 on #f3e8ff, 6.04:1 on #fff */
+  --hero-opal-ink-cyan: #0e7490;   /* 4.54:1 on #f3e8ff, 5.36:1 on #fff */
+  --hero-opal-ink-emerald: #047857;/* 4.65:1 on #f3e8ff, 5.48:1 on #fff */
+
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -79,9 +94,11 @@
 
 .inner {
   box-sizing: border-box;
+  width: 100%;
   max-width: var(--ob-maxw);
-  margin: 0 auto;
-  padding: clamp(var(--ob-space-6), 12vw, 128px) var(--ob-space-3);
+  margin-inline: auto;
+  padding-block: clamp(var(--ob-space-6), 12vw, 128px);
+  padding-inline: var(--ob-gutter);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -158,9 +175,185 @@
 
 @media (min-width: 720px) {
   .inner {
-    padding-inline: var(--ob-space-4);
     gap: var(--ob-space-5);
   }
+}
+
+/* Headline accent span: inert on the dark statement design. */
+.accent {
+  color: inherit;
+}
+
+/* Bigger display size when the editor picks headingSize "xl": the generic
+   xl rule in display.css (max 3.25rem) is sized for section headings; a
+   text-only hero needs more presence. Specificity 0,4,0 beats display.css's
+   0,3,1 only for the hero h1. lg / md keep the editor's choice. */
+:global(.ob-node[data-ob-headingsize="xl"]) .hero .heading {
+  font-size: clamp(2.5rem, 1.4rem + 4.6vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+/* ============================================================
+   Light variant: the node is painted by the CMS (Visual Builder
+   background). The hero paints nothing itself and inherits the
+   surface's own --ob-fg / --ob-muted, which display.css sets per
+   surface and per theme, so contrast follows the surface.
+   ============================================================ */
+:is(
+    :global(.ob-node[data-ob-background="opal"]),
+    :global(.ob-node[data-ob-background="white"]),
+    :global(.ob-node[data-ob-background="offwhite"]),
+    :global(.ob-node[data-ob-background="bluegrad"]),
+    :global(.ob-node[data-ob-background="purple"])
+  )
+  .hero {
+  --hero-fg: var(--ob-fg);
+  --hero-fg-muted: var(--ob-muted);
+  --hero-pop: var(--ob-brand-fir);
+  background: transparent;
+  color: var(--hero-fg);
+}
+
+:is(
+    :global(.ob-node[data-ob-background="opal"]),
+    :global(.ob-node[data-ob-background="white"]),
+    :global(.ob-node[data-ob-background="offwhite"]),
+    :global(.ob-node[data-ob-background="bluegrad"]),
+    :global(.ob-node[data-ob-background="purple"])
+  )
+  .glow {
+  display: none;
+}
+
+/* Solid fir pill, white label: 5.07:1. */
+:is(
+    :global(.ob-node[data-ob-background="opal"]),
+    :global(.ob-node[data-ob-background="white"]),
+    :global(.ob-node[data-ob-background="offwhite"]),
+    :global(.ob-node[data-ob-background="bluegrad"]),
+    :global(.ob-node[data-ob-background="purple"])
+  )
+  .ctaPrimary {
+  background: var(--ob-brand-fir);
+  color: var(--ob-accent-fg);
+  box-shadow: var(--ob-shadow);
+}
+
+:is(
+    :global(.ob-node[data-ob-background="opal"]),
+    :global(.ob-node[data-ob-background="white"]),
+    :global(.ob-node[data-ob-background="offwhite"]),
+    :global(.ob-node[data-ob-background="bluegrad"]),
+    :global(.ob-node[data-ob-background="purple"])
+  )
+  .cta:hover {
+  background: var(--ob-brand-ink-2);
+}
+
+:is(
+    :global(.ob-node[data-ob-background="opal"]),
+    :global(.ob-node[data-ob-background="white"]),
+    :global(.ob-node[data-ob-background="offwhite"]),
+    :global(.ob-node[data-ob-background="bluegrad"]),
+    :global(.ob-node[data-ob-background="purple"])
+  )
+  .cta:focus-visible {
+  outline-color: var(--ob-fg);
+}
+
+/* ============================================================
+   Opal: Optimizely Opal brand treatment on top of the light variant.
+   ============================================================ */
+
+/* Soft glow orbs, decorative (aria-hidden span). closest-side radii end
+   each orb exactly at the nearest box edge, so the hero's overflow clip
+   never shows a hard line against the surrounding opal wrapper. */
+:global(.ob-node[data-ob-background="opal"]) .hero .glow {
+  display: block;
+  background:
+    radial-gradient(
+      circle closest-side at 80% 38%,
+      color-mix(in srgb, var(--hero-opal-violet) 24%, transparent),
+      color-mix(in srgb, var(--hero-opal-violet) 8%, transparent) 55%,
+      transparent
+    ),
+    radial-gradient(
+      circle closest-side at 60% 58%,
+      color-mix(in srgb, var(--hero-opal-cyan) 14%, transparent),
+      color-mix(in srgb, var(--hero-opal-cyan) 6%, transparent) 55%,
+      transparent
+    ),
+    radial-gradient(
+      circle closest-side at 90% 64%,
+      color-mix(in srgb, var(--hero-opal-pink) 14%, transparent),
+      transparent
+    );
+  animation: hero-orbs 18s ease-in-out infinite alternate;
+}
+
+@keyframes hero-orbs {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* On narrow screens the orbs sit behind the copy; keep them quieter. */
+@media (max-width: 719px) {
+  :global(.ob-node[data-ob-background="opal"]) .hero .glow {
+    opacity: 0.6;
+    animation: none;
+  }
+}
+
+/* Signature rule takes the Opal accent gradient (decorative). */
+:global(.ob-node[data-ob-background="opal"]) .hero .rule {
+  width: 72px;
+  background: linear-gradient(
+    to right,
+    var(--hero-opal-violet),
+    var(--hero-opal-pink),
+    var(--hero-opal-cyan),
+    var(--hero-opal-emerald)
+  );
+}
+
+/* Last headline word in the Opal accent gradient, gradient-clipped text.
+   The solid colour is the fallback where background-clip:text is not
+   supported; the span is plain text to assistive tech. */
+:global(.ob-node[data-ob-background="opal"]) .hero .accent {
+  color: var(--hero-opal-ink-violet);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  :global(.ob-node[data-ob-background="opal"]) .hero .accent {
+    background-image: linear-gradient(
+      to right,
+      var(--hero-opal-ink-violet),
+      var(--hero-opal-ink-pink) 55%,
+      var(--hero-opal-ink-cyan)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* Keep descenders inside the painted box. */
+    padding-bottom: 0.08em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+}
+
+/* Opt-in dark theme repaints opal dark (display.css): swap to the light
+   400-weight hues, all >= 5.3:1 on the dark opal fill. */
+:global(:root[data-theme="dark"]) .hero {
+  --hero-opal-ink-violet: #c084fc;
+  --hero-opal-ink-pink: #f472b6;
+  --hero-opal-ink-cyan: #22d3ee;
+  --hero-opal-ink-emerald: #34d399;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -170,5 +363,9 @@
 
   .cta:hover {
     transform: none;
+  }
+
+  :global(.ob-node[data-ob-background="opal"]) .hero .glow {
+    animation: none;
   }
 }

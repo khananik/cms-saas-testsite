@@ -3,21 +3,44 @@
 .section {
   display: block;
   width: 100%;
-  padding-block: var(--ob-space-5);
-  background: var(--ob-bg);
+  /* Page rhythm token from display.css (64px; 40px on phones). No
+     background here: an unpainted section is transparent so the page
+     shows through, and painted ones get their surface from display.css. */
+  padding-block: var(--ob-rhythm, var(--ob-space-5));
   color: var(--ob-fg);
 }
 
+/* THE content box (see .ob-container in globals.css): the gutter sits INSIDE
+   the max-width box, so content starts at the header logo's edge. */
 .container {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--ob-maxw);
   margin-inline: auto;
-  padding-inline: var(--ob-space-3); /* 16px gutter at 360px */
+  padding-inline: var(--ob-gutter);
 }
 
+/* Full-bleed variant: the band's content runs edge to edge, still off the
+   viewport edge by the gutter. Blocks inside that centre a content box get a
+   measure narrowed by both gutters, so their content lands on the same edge
+   as everywhere else ((viewport - maxw) / 2 + gutter). Computed here, on the
+   container, so children inherit a resolved value (no self-reference). */
 .containerFull {
+  box-sizing: border-box;
   width: 100%;
-  padding-inline: var(--ob-space-3);
+  padding-inline: var(--ob-gutter);
+  --ob-full-maxw: calc(var(--ob-maxw) - 2 * var(--ob-gutter));
+}
+
+/* The container has already applied the page gutter, so nothing inside it
+   pads again: every block that uses var(--ob-gutter) collapses to 0 here. */
+.container > *,
+.containerFull > * {
+  --ob-gutter: 0px;
+}
+
+.containerFull > * {
+  --ob-maxw: var(--ob-full-maxw);
 }
 
 .row {
@@ -60,11 +83,5 @@
     flex-basis: auto !important;
     max-width: 100% !important;
     width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .section {
-    padding-block: var(--ob-space-4);
   }
 }

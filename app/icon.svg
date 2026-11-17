@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mosey Bank">
+  <rect width="64" height="64" rx="14" fill="#00251a"/>
+  <path d="M15 46V20l10 15 10-15v26" fill="none" stroke="#eff6e9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="47" cy="41" r="5.5" fill="#abff44"/>
+</svg>
