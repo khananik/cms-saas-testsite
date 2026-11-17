@@ -1,0 +1,152 @@
+/* ============================================================
+   Site announcement strip. Sits above the header, full-bleed
+   surface, centred content on the shared measure.
+
+   Contrast: --ob-brand-bright (#abff44) is a LIGHT green, so it
+   only ever appears on the dark fir surfaces below. The light
+   surfaces (warning / alert) take --ob-brand-ink as their ink.
+   ============================================================ */
+
+.bar {
+  width: 100%;
+  font-family: var(--ob-font);
+  /* Fixed brand surfaces, so the text colour must be fixed too — these are set
+     per variant below and never inherit a theme-dependent foreground. */
+  background: var(--ob-brand-ink);
+  color: var(--ob-n2);
+}
+
+.inner {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding: var(--ob-space-2) var(--ob-space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: var(--ob-space-3);
+  row-gap: var(--ob-space-1);
+  text-align: center;
+}
+
+/* Small brand pip that carries the variant colour without relying on it for text. */
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ob-brand-bright);
+}
+
+.message {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ob-space-1);
+  /* 44px tap target without inflating the strip: padding plus min-height. */
+  min-height: 44px;
+  padding-inline: var(--ob-space-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ob-brand-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  overflow-wrap: anywhere;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+
+.link:hover {
+  opacity: 0.85;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--ob-brand-bright);
+  outline-offset: 2px;
+  border-radius: var(--ob-space-1);
+}
+
+.chevron {
+  font-size: 1em;
+  line-height: 1;
+  transition: transform 120ms ease;
+}
+
+.link:hover .chevron {
+  transform: translateX(2px);
+}
+
+/* ---------- Variants ----------
+   info    dark fir + lfgreen  — the brand signature pairing
+   success deeper fir + good-to-go
+   warning amber surface, fir ink
+   alert   pink surface, fir ink                                   */
+
+.bar[data-variant="success"] {
+  background: var(--ob-brand-ink-2);
+  color: var(--ob-n2);
+}
+
+.bar[data-variant="success"] .dot {
+  background: var(--ob-brand-go);
+}
+
+.bar[data-variant="success"] .link {
+  color: var(--ob-brand-go);
+}
+
+.bar[data-variant="success"] .link:focus-visible {
+  outline-color: var(--ob-brand-go);
+}
+
+.bar[data-variant="warning"] {
+  background: var(--ob-brand-amber);
+  color: var(--ob-brand-ink);
+}
+
+.bar[data-variant="alert"] {
+  background: var(--ob-brand-pink);
+  color: var(--ob-brand-ink);
+}
+
+/* On the two light surfaces, every element takes the dark fir ink — lfgreen
+   and good-to-go would both fail AA here. */
+.bar[data-variant="warning"] .dot,
+.bar[data-variant="alert"] .dot {
+  background: var(--ob-brand-ink);
+}
+
+.bar[data-variant="warning"] .link,
+.bar[data-variant="alert"] .link {
+  color: var(--ob-brand-ink);
+}
+
+.bar[data-variant="warning"] .link:focus-visible,
+.bar[data-variant="alert"] .link:focus-visible {
+  outline-color: var(--ob-brand-ink);
+}
+
+@media (min-width: 720px) {
+  .inner {
+    padding-inline: var(--ob-space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .chevron {
+    transition: none;
+  }
+
+  .link:hover .chevron {
+    transform: none;
+  }
+}

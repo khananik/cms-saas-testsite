@@ -56,6 +56,7 @@ export default function SectionHeadingBlock({ data, ctx }: BlockComponentProps) 
   return (
     <section className={`${styles.block} ${alignmentClass[align]}`}>
       <div className={styles.inner}>
+        {heading ? <span aria-hidden="true" className={styles.rule} /> : null}
         {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
         {heading ? (
           <h2 className={styles.heading} {...editable(ctx, data, "heading", "title", "headline", "header", "name")}>

@@ -88,3 +88,27 @@ export function isStructureNode(node: CompositionNode | null | undefined): node 
   if (!isRecord(node)) return false;
   return !isComponentNode(node);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Site chrome                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One piece of site furniture (Navigation / Footer / SiteBanner / SiteSettings)
+ * as it arrives from Graph: `_json` flattened onto the item, exactly like a
+ * composition component. Property casing varies per instance, so this is the
+ * same open shape as BlockData — read it through lib/fields.ts.
+ */
+export type ChromeItem = BlockData;
+
+/**
+ * The four chrome parts. Every part is independently nullable: the CMS may not
+ * have one authored, and a Graph failure degrades to all-null rather than
+ * taking the page down.
+ */
+export type SiteChrome = {
+  navigation: ChromeItem | null;
+  footer: ChromeItem | null;
+  banner: ChromeItem | null;
+  settings: ChromeItem | null;
+};

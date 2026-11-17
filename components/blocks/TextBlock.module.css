@@ -1,7 +1,15 @@
+/*
+ * Long-form article prose (the blog pages run on this block).
+ *
+ * Every colour here comes from an --ob-* token: no raw hex. The light-surface
+ * accent is --ob-accent; --ob-brand-bright is deliberately NOT used anywhere in
+ * this file because it is a light green (~1.4:1 on white) and belongs only on
+ * the dark ink surfaces.
+ */
 .block {
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-4) var(--ob-space-3);
+  padding: var(--ob-space-5) var(--ob-space-3);
   color: var(--ob-fg);
 }
 
@@ -16,9 +24,10 @@
   max-width: 68ch;
   margin: 0 auto;
   font-family: var(--ob-font);
-  font-size: 1.0625rem;
-  line-height: 1.75;
+  font-size: clamp(1.0625rem, 1.025rem + 0.19vw, 1.1875rem);
+  line-height: 1.72;
   color: var(--ob-fg);
+  text-rendering: optimizeLegibility;
   /* Long URLs and unbroken strings must not push the page sideways at 360px. */
   overflow-wrap: anywhere;
 }
@@ -33,7 +42,7 @@
 }
 
 .prose p {
-  margin: 0 0 var(--ob-space-3);
+  margin: 0 0 var(--ob-space-4);
 }
 
 /*
@@ -45,11 +54,12 @@
 .prose h4,
 .prose h5,
 .prose h6 {
-  margin: var(--ob-space-5) 0 var(--ob-space-2);
+  margin: var(--ob-space-5) 0 var(--ob-space-3);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
   text-wrap: balance;
-  color: var(--ob-fg);
+  color: var(--ob-brand-ink);
 }
 
 /*
@@ -59,52 +69,80 @@
  */
 .prose h1 {
   margin: var(--ob-space-5) 0 var(--ob-space-3);
-  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  font-size: clamp(1.625rem, 1.25rem + 1.6vw, 2.125rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   text-wrap: balance;
-  color: var(--ob-fg);
+  color: var(--ob-brand-ink);
 }
 
 .prose h2 {
-  font-size: clamp(1.375rem, 1.15rem + 1vw, 1.75rem);
+  position: relative;
+  margin-top: var(--ob-space-6);
+  padding-top: var(--ob-space-3);
+  font-size: clamp(1.4375rem, 1.15rem + 1.2vw, 1.8125rem);
+  letter-spacing: -0.018em;
+}
+
+/*
+ * Decorative brand rule above each section heading — a short fir bar that gives
+ * the article page its rhythm. Purely ornamental, so it is hidden from AT and
+ * carries no contrast requirement.
+ */
+.prose h2::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: var(--ob-space-5);
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ob-brand-fir);
 }
 
 .prose h3 {
-  font-size: clamp(1.1875rem, 1.075rem + 0.5vw, 1.375rem);
+  font-size: clamp(1.1875rem, 1.075rem + 0.55vw, 1.4375rem);
 }
 
 .prose h4 {
   font-size: 1.0625rem;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
 }
 
 .prose h5,
 .prose h6 {
-  font-size: 1rem;
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ob-muted);
 }
 
 .prose ul,
 .prose ol {
-  margin: 0 0 var(--ob-space-3);
+  margin: 0 0 var(--ob-space-4);
   padding-inline-start: var(--ob-space-4);
 }
 
 .prose li {
-  margin-bottom: var(--ob-space-1);
+  margin-bottom: var(--ob-space-2);
+  padding-inline-start: var(--ob-space-1);
+}
+
+.prose li::marker {
+  color: var(--ob-accent);
 }
 
 .prose li > ul,
 .prose li > ol {
-  margin-top: var(--ob-space-1);
+  margin-top: var(--ob-space-2);
   margin-bottom: 0;
 }
 
 .prose strong,
 .prose b {
   font-weight: 700;
-  color: var(--ob-fg);
+  color: var(--ob-brand-ink);
 }
 
 .prose em,
@@ -112,50 +150,83 @@
   font-style: italic;
 }
 
+/*
+ * Links: brand fir with a considered underline — thin, set well clear of the
+ * descenders, and tinted so the rule reads as supporting the word rather than
+ * cutting it. Hover/focus thickens it to full accent.
+ */
 .prose a {
   color: var(--ob-accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--ob-accent) 42%, transparent);
   text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: auto;
+  transition: text-decoration-color 120ms ease, color 120ms ease;
 }
 
 .prose a:hover {
+  text-decoration-color: var(--ob-accent);
   text-decoration-thickness: 2px;
 }
 
 .prose a:focus-visible,
 .prose :focus-visible {
   outline: 2px solid var(--ob-accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
   border-radius: calc(var(--ob-radius) / 2);
 }
 
+/*
+ * Pull quote: brand-tinted left rule on the soft neutral surface. Set in full
+ * ink (not muted) so the larger type stays crisp, and upright rather than
+ * italic — italic at this size reads as emphasis, not as a quotation.
+ */
 .prose blockquote {
-  margin: var(--ob-space-4) 0;
-  padding: var(--ob-space-3);
-  border-inline-start: 3px solid var(--ob-accent);
-  border-radius: var(--ob-radius);
+  margin: var(--ob-space-5) 0;
+  padding: var(--ob-space-4);
+  border-inline-start: 4px solid var(--ob-brand-fir);
+  border-radius: 0 var(--ob-radius) var(--ob-radius) 0;
   background: var(--ob-surface);
-  color: var(--ob-muted);
-  font-style: italic;
+  color: var(--ob-brand-ink-2);
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+
+.prose blockquote p {
+  margin-bottom: var(--ob-space-3);
 }
 
 .prose blockquote > :last-child {
   margin-bottom: 0;
 }
 
+.prose blockquote cite {
+  display: block;
+  margin-top: var(--ob-space-2);
+  color: var(--ob-muted);
+  font-size: 0.875rem;
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+/* Section break: a short centred rule rather than a full-width divider. */
 .prose hr {
-  margin: var(--ob-space-5) 0;
+  width: var(--ob-space-6);
+  margin: var(--ob-space-6) auto;
   border: 0;
-  border-top: 1px solid var(--ob-border);
+  border-top: 3px solid var(--ob-n5);
+  border-radius: 999px;
 }
 
 .prose code {
-  padding: 0 var(--ob-space-1);
+  padding: 0.12em var(--ob-space-1);
+  border: 1px solid var(--ob-n4);
   border-radius: calc(var(--ob-radius) / 2);
-  background: var(--ob-surface);
+  background: var(--ob-n3);
+  color: var(--ob-brand-ink);
   font-family: var(--ob-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-  font-size: 0.9375em;
+  font-size: 0.875em;
 }
 
 .prose pre {
@@ -164,17 +235,23 @@
   margin: 0 0 var(--ob-space-4);
   padding: var(--ob-space-3);
   overflow-x: auto;
-  border: 1px solid var(--ob-border);
+  border: 1px solid var(--ob-n4);
+  border-inline-start: 3px solid var(--ob-brand-fir);
   border-radius: var(--ob-radius);
   background: var(--ob-surface);
-  line-height: 1.6;
+  color: var(--ob-brand-ink);
+  font-size: 0.875rem;
+  line-height: 1.65;
   /* Code is pre-formatted: it scrolls inside its box instead of breaking mid-token. */
   overflow-wrap: normal;
+  -webkit-overflow-scrolling: touch;
 }
 
 .prose pre code {
   padding: 0;
+  border: 0;
   background: none;
+  font-size: inherit;
   white-space: pre;
 }
 
@@ -185,16 +262,17 @@
 }
 
 .prose figure {
-  margin: var(--ob-space-4) 0;
+  margin: var(--ob-space-5) 0;
 }
 
 .prose figure img {
   display: block;
   margin-inline: auto;
+  box-shadow: var(--ob-shadow);
 }
 
 .prose figcaption {
-  margin-top: var(--ob-space-2);
+  margin-top: var(--ob-space-3);
   color: var(--ob-muted);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -216,31 +294,44 @@
   border-collapse: collapse;
   font-size: 0.9375rem;
   line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-overflow-scrolling: touch;
 }
 
 .prose caption {
   margin-bottom: var(--ob-space-2);
   color: var(--ob-muted);
   font-size: 0.875rem;
+  letter-spacing: 0.02em;
   text-align: start;
 }
 
 .prose th,
 .prose td {
-  padding: var(--ob-space-2);
-  border: 1px solid var(--ob-border);
+  padding: var(--ob-space-2) var(--ob-space-3);
+  border-bottom: 1px solid var(--ob-n4);
   text-align: start;
   vertical-align: top;
 }
 
+/* The header rule is structural, so it is set in a neutral that clears 3:1. */
 .prose th {
+  border-bottom: 2px solid var(--ob-n7);
   background: var(--ob-surface);
-  font-weight: 600;
+  color: var(--ob-brand-ink);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.prose tbody tr:last-child th,
+.prose tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 @media (min-width: 640px) {
   .block {
-    padding: var(--ob-space-5) var(--ob-space-4);
+    padding: var(--ob-space-6) var(--ob-space-4);
   }
 }
 

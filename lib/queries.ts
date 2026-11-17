@@ -1,7 +1,7 @@
 import "server-only";
 
-import { graphQuery } from "@/lib/graph";
-import type { ExperiencePage } from "@/lib/types";
+import { GraphError, graphQuery } from "@/lib/graph";
+import type { ChromeItem, ExperiencePage, SiteChrome } from "@/lib/types";
 
 /**
  * Query construction for testsiteanik.
@@ -181,6 +181,57 @@ export const PREVIEW_BY_KEY_VERSION_QUERY = `
 `;
 
 /* -------------------------------------------------------------------------- */
+/* Site chrome                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Site furniture lives in four singleton content types. Each is selected with
+ * `(limit: 1) { item { ... } }` — `item`, NOT `items`: Graph rejects `_json`
+ * under `items`.
+ *
+ * `_json` returns the whole authored tree in one go, so the arbitrarily deep
+ * NavigationItem nesting (label / href / description / openInNewTab / children)
+ * needs no recursive selection and no query change when the CMS gains a level.
+ */
+const CHROME_ITEM_SELECTION = `
+  item {
+    _metadata { key locale }
+    _json
+  }
+`;
+
+export const SITE_CHROME_QUERY = `
+  query SiteChrome {
+    Navigation(limit: 1) { ${CHROME_ITEM_SELECTION} }
+    Footer(limit: 1) { ${CHROME_ITEM_SELECTION} }
+    SiteBanner(limit: 1) { ${CHROME_ITEM_SELECTION} }
+    SiteSettings(limit: 1) { ${CHROME_ITEM_SELECTION} }
+  }
+`;
+
+/** As above, restricted to one locale. */
+export const SITE_CHROME_LOCALE_QUERY = `
+  query SiteChromeLocale($locale: String!) {
+    Navigation(
+      where: { _metadata: { locale: { eq: $locale } } }
+      limit: 1
+    ) { ${CHROME_ITEM_SELECTION} }
+    Footer(
+      where: { _metadata: { locale: { eq: $locale } } }
+      limit: 1
+    ) { ${CHROME_ITEM_SELECTION} }
+    SiteBanner(
+      where: { _metadata: { locale: { eq: $locale } } }
+      limit: 1
+    ) { ${CHROME_ITEM_SELECTION} }
+    SiteSettings(
+      where: { _metadata: { locale: { eq: $locale } } }
+      limit: 1
+    ) { ${CHROME_ITEM_SELECTION} }
+  }
+`;
+
+/* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -349,4 +400,71 @@ export async function getPreviewContent(
   });
 
   return normalisePage(firstItem(result?._Experience?.items));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Site chrome                                                                */
+/* -------------------------------------------------------------------------- */
+
+/** Chrome changes far less often than page content, so it is cached longer. */
+const CHROME_REVALIDATE_SECONDS = 300;
+
+type ChromeSlot = { item?: unknown } | null | undefined;
+
+type SiteChromeResult = {
+  Navigation?: ChromeSlot;
+  Footer?: ChromeSlot;
+  SiteBanner?: ChromeSlot;
+  SiteSettings?: ChromeSlot;
+};
+
+const EMPTY_CHROME: SiteChrome = {
+  navigation: null,
+  footer: null,
+  banner: null,
+  settings: null,
+};
+
+/**
+ * Flattens one chrome slot's `_json` onto the item, reusing the same
+ * normaliser the composition tree uses so blocks and chrome read alike.
+ */
+function normaliseChromeSlot(slot: ChromeSlot): ChromeItem | null {
+  if (!isRecord(slot)) return null;
+  const normalised = normaliseComponent(slot.item);
+  return isRecord(normalised) ? (normalised as ChromeItem) : null;
+}
+
+/**
+ * Header, footer, banner and settings in ONE cached Graph request.
+ *
+ * This function never throws out to the caller: the chrome is decoration, and a
+ * Graph failure must not take down the page it wraps. GraphError is logged
+ * server-side and all four parts come back null, so layouts render without
+ * chrome rather than erroring. Unexpected (non-GraphError) failures are
+ * deliberately left to propagate — they are bugs, not upstream outages.
+ */
+export async function getSiteChrome(locale?: string): Promise<SiteChrome> {
+  const normalisedLocale = normaliseLocale(locale);
+
+  try {
+    const result = await graphQuery<SiteChromeResult>({
+      query: normalisedLocale ? SITE_CHROME_LOCALE_QUERY : SITE_CHROME_QUERY,
+      variables: normalisedLocale ? { locale: normalisedLocale } : {},
+      revalidate: CHROME_REVALIDATE_SECONDS,
+    });
+
+    return {
+      navigation: normaliseChromeSlot(result?.Navigation),
+      footer: normaliseChromeSlot(result?.Footer),
+      banner: normaliseChromeSlot(result?.SiteBanner),
+      settings: normaliseChromeSlot(result?.SiteSettings),
+    };
+  } catch (cause) {
+    if (cause instanceof GraphError) {
+      console.error("[chrome] site chrome unavailable", cause);
+      return EMPTY_CHROME;
+    }
+    throw cause;
+  }
 }

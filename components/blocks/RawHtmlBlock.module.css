@@ -1,7 +1,19 @@
+/*
+ * Deliberately NEUTRAL.
+ *
+ * This block renders CMS-authored markup that ships its own <style> element and
+ * inline styles. Any typography or colour rule here would cascade into that
+ * markup and fight the author, so this file is limited to the wrapper:
+ * rhythm, measure, and the guards that keep authored content from breaking the
+ * page (no horizontal scroll, no runaway media). Do not add font, colour or
+ * element-decoration rules below.
+ */
+
 .block {
   box-sizing: border-box;
   width: 100%;
   padding: var(--ob-space-4) var(--ob-space-3);
+  /* Inherited default ink only: authored colour rules still win over this. */
   color: var(--ob-fg);
 }
 
@@ -9,13 +21,11 @@
   box-sizing: border-box;
   max-width: var(--ob-maxw);
   margin: 0 auto;
-  font-family: var(--ob-font);
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--ob-fg);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
+/* Wrapper rhythm: the block owns its outer padding, so trim the authored
+   markup's leading/trailing margins rather than doubling them. */
 .inner > :first-child {
   margin-top: 0;
 }
@@ -24,134 +34,32 @@
   margin-bottom: 0;
 }
 
-.inner h1,
-.inner h2,
-.inner h3,
-.inner h4,
-.inner h5,
-.inner h6 {
-  margin: var(--ob-space-4) 0 var(--ob-space-2);
-  font-weight: 700;
-  line-height: 1.25;
-  text-wrap: balance;
-  color: var(--ob-fg);
-}
-
-.inner h1 {
-  font-size: clamp(1.5rem, 1.15rem + 1.6vw, 2.25rem);
-}
-
-.inner h2 {
-  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem);
-}
-
-.inner h3 {
-  font-size: 1.15rem;
-}
-
-.inner p {
-  margin: 0 0 var(--ob-space-3);
-}
-
-.inner ul,
-.inner ol {
-  margin: 0 0 var(--ob-space-3);
-  padding-inline-start: var(--ob-space-4);
-}
-
-.inner li {
-  margin-bottom: var(--ob-space-1);
-}
-
-.inner a {
-  color: var(--ob-accent);
-  text-underline-offset: 2px;
-}
-
-.inner a:hover {
-  text-decoration: none;
-}
-
-.inner :focus-visible {
-  outline: 2px solid var(--ob-accent);
-  outline-offset: 2px;
-  border-radius: var(--ob-radius);
-}
-
-.inner blockquote {
-  margin: 0 0 var(--ob-space-3);
-  padding: var(--ob-space-2) var(--ob-space-3);
-  border-inline-start: 3px solid var(--ob-accent);
-  background: var(--ob-surface);
-  border-radius: var(--ob-radius);
-  color: var(--ob-muted);
-}
-
-.inner hr {
-  margin: var(--ob-space-4) 0;
-  border: 0;
-  border-top: 1px solid var(--ob-border);
-}
-
-.inner code {
-  padding: 0 var(--ob-space-1);
-  border-radius: calc(var(--ob-radius) / 2);
-  background: var(--ob-surface);
-  font-size: 0.9375em;
-}
-
-.inner pre {
-  margin: 0 0 var(--ob-space-3);
-  padding: var(--ob-space-3);
+/* Overflow guards — not decoration. Keep authored media and wide tables inside
+   the measure so there is no horizontal page scroll at 360px. */
+.inner img,
+.inner svg,
+.inner video,
+.inner iframe,
+.inner canvas {
   max-width: 100%;
-  overflow-x: auto;
-  background: var(--ob-surface);
-  border: 1px solid var(--ob-border);
-  border-radius: var(--ob-radius);
-}
-
-.inner pre code {
-  padding: 0;
-  background: none;
 }
 
 .inner img,
-.inner figure img {
-  max-width: 100%;
+.inner video {
   height: auto;
-  border-radius: var(--ob-radius);
 }
 
-.inner figure {
-  margin: 0 0 var(--ob-space-3);
-}
-
-.inner figcaption {
-  margin-top: var(--ob-space-1);
-  font-size: 0.875rem;
-  color: var(--ob-muted);
-}
-
+.inner pre,
 .inner table {
-  display: block;
   max-width: 100%;
-  margin: 0 0 var(--ob-space-3);
   overflow-x: auto;
-  border-collapse: collapse;
-  font-size: 0.9375rem;
 }
 
-.inner th,
-.inner td {
-  padding: var(--ob-space-2);
-  border: 1px solid var(--ob-border);
-  text-align: start;
-  vertical-align: top;
-}
-
-.inner th {
-  background: var(--ob-surface);
-  font-weight: 600;
+/* Accessibility guard: authored markup may contain links or controls with no
+   focus style of its own. Ring only — it adds no resting colour. */
+.inner :focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
 }
 
 @media (min-width: 640px) {

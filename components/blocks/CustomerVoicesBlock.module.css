@@ -1,7 +1,11 @@
+/* Customer voices — a tinted brand band with white quote cards.
+   Section surface: --ob-surface. Card surface: --ob-bg. */
+
 .block {
-  background: var(--ob-bg);
+  background: var(--ob-surface);
   color: var(--ob-fg);
   padding-block: var(--ob-space-6);
+  border-block: 1px solid var(--ob-border);
 }
 
 .inner {
@@ -16,18 +20,36 @@
   max-width: 60ch;
 }
 
+/* Small brand rule above the heading. Decorative only. */
+.header::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 4px;
+  border-radius: 2px;
+  margin-bottom: var(--ob-space-3);
+  background: linear-gradient(
+    90deg,
+    var(--ob-brand-fir) 0%,
+    var(--ob-brand-go) 100%
+  );
+}
+
 .heading {
   margin: 0;
-  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+  text-wrap: balance;
 }
 
 .intro {
-  margin: var(--ob-space-2) 0 0;
+  margin: var(--ob-space-3) 0 0;
   color: var(--ob-muted);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .viewportWrap {
@@ -42,22 +64,26 @@
   display: grid;
   gap: var(--ob-space-4);
   grid-template-columns: 1fr;
+  align-items: stretch;
 }
 
 /* Slider: CSS-only scroll-snap works with or without JS. */
 .track {
   list-style: none;
   margin: 0;
-  padding: 0 0 var(--ob-space-2);
+  padding: var(--ob-space-1) var(--ob-space-1) var(--ob-space-3);
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--ob-space-4);
+  align-items: stretch;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 0;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ob-n6) transparent;
 }
 
 .track:focus-visible {
@@ -73,23 +99,62 @@
 }
 
 .card {
+  position: relative;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--ob-space-3);
   width: 100%;
-  background: var(--ob-surface);
+  background: var(--ob-bg);
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius);
   box-shadow: var(--ob-shadow);
   padding: var(--ob-space-4);
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+/* Brand hairline across the top of every card. Decorative. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--ob-brand-fir) 0%,
+    var(--ob-brand-go) 60%,
+    var(--ob-brand-grass) 100%
+  );
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ob-n5);
+  box-shadow: var(--ob-shadow);
+}
+
+/* Oversized decorative quote mark. aria-hidden in markup. */
+.mark {
+  display: block;
+  font-size: 3rem;
+  line-height: 0.7;
+  height: 1.4rem;
+  color: var(--ob-n5);
+  font-family: Georgia, "Times New Roman", serif;
+  user-select: none;
 }
 
 .quote {
   margin: 0;
   color: var(--ob-fg);
   font-size: 1.0625rem;
-  line-height: 1.6;
+  line-height: 1.65;
+  text-wrap: pretty;
 }
 
 .quote p {
@@ -119,19 +184,22 @@
   flex: 0 0 auto;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--ob-bg);
+  background: var(--ob-surface);
   border: 1px solid var(--ob-border);
+  box-shadow: 0 0 0 3px var(--ob-n3);
 }
 
 .personText {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 2px;
 }
 
 .name {
-  font-weight: 600;
+  font-weight: 650;
   line-height: 1.3;
+  letter-spacing: -0.005em;
 }
 
 .role {
@@ -158,15 +226,20 @@
   height: 44px;
   font-size: 1.125rem;
   color: var(--ob-fg);
-  background: var(--ob-surface);
-  border: 1px solid var(--ob-border);
+  background: var(--ob-bg);
+  border: 1px solid var(--ob-n7);
   border-radius: 50%;
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 
 .arrow:hover:not(:disabled) {
+  background: var(--ob-accent);
   border-color: var(--ob-accent);
-  color: var(--ob-accent);
+  color: var(--ob-accent-fg);
 }
 
 .arrow:disabled {
@@ -205,16 +278,19 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--ob-border);
+  background: var(--ob-n7);
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
 }
 
 .dot:hover::before {
-  background: var(--ob-muted);
+  background: var(--ob-fg);
 }
 
 .dot[aria-current="true"]::before {
   background: var(--ob-accent);
-  transform: scale(1.3);
+  transform: scale(1.4);
 }
 
 @media (min-width: 640px) {
@@ -224,6 +300,10 @@
 
   .track {
     grid-auto-columns: minmax(0, calc(50% - var(--ob-space-4) / 2));
+  }
+
+  .card {
+    padding: var(--ob-space-5) var(--ob-space-4) var(--ob-space-4);
   }
 }
 
@@ -240,6 +320,16 @@
 @media (prefers-reduced-motion: reduce) {
   .track {
     scroll-behavior: auto;
+  }
+
+  .card,
+  .arrow,
+  .dot::before {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
   }
 
   .dot[aria-current="true"]::before {

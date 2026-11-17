@@ -1,10 +1,36 @@
+/*
+ * ImageBlock — a framed figure with an optional caption.
+ *
+ * Colour comes from --ob-* tokens only. The frame is decorative: the image
+ * itself carries the visual boundary, so the hairline border is a refinement
+ * rather than a required UI edge.
+ */
+
 .block {
+  box-sizing: border-box;
   display: block;
+  width: 100%;
   max-width: var(--ob-maxw);
+  /* figure carries a browser default margin — reset it before centring. */
   margin: 0 auto;
   padding: var(--ob-space-5) var(--ob-space-3);
   background: var(--ob-bg);
   color: var(--ob-fg);
+}
+
+/*
+ * The frame owns the shape and elevation so the image can never paint over a
+ * rounded corner, and so a transparent PNG sits on a brand surface rather than
+ * on bare white.
+ */
+.frame {
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+  background: var(--ob-surface);
+  box-shadow: var(--ob-shadow);
 }
 
 .image {
@@ -14,23 +40,42 @@
   max-height: 70vh;
   height: auto;
   object-fit: contain;
-  border-radius: var(--ob-radius);
-  background: var(--ob-surface);
-  border: 1px solid var(--ob-border);
-  box-shadow: var(--ob-shadow);
 }
 
+/*
+ * Caption: small, muted, and tied to the image by a short accent rule rather
+ * than by extra markup. The rule is drawn with a pseudo-element so the
+ * figcaption stays a plain text node for assistive tech.
+ */
 .caption {
-  margin: var(--ob-space-2) 0 0;
-  color: var(--ob-muted);
+  margin: var(--ob-space-3) auto 0;
+  max-width: 62ch;
+  font-family: var(--ob-font);
   font-size: 0.875rem;
   line-height: 1.6;
+  color: var(--ob-muted);
   text-align: center;
-  overflow-wrap: break-word;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
 }
 
-@media (min-width: 860px) {
+.caption::before {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin: 0 auto var(--ob-space-2);
+  border-radius: 2px;
+  background: var(--ob-accent);
+}
+
+@media (min-width: 720px) {
   .block {
     padding: var(--ob-space-6) var(--ob-space-3);
+  }
+
+  .caption {
+    margin-top: var(--ob-space-4);
+    font-size: 0.9375rem;
   }
 }

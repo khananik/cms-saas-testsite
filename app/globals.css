@@ -8,17 +8,53 @@
 @import "./display.css";
 
 :root {
-  /* Colour */
+  /* ---------- Brand palette ----------
+     These are Mosey/Optimizely brand values, taken from the palette the CMS's
+     own authored Raw HTML sections already define (--oh-lfgreen, --oh-dark-fir
+     and friends). Using the same values is what makes our blocks and those
+     authored sections read as one site rather than two.
+     Raw brand ramp, for reference when adding surfaces:
+       lfgreen #ABFF44  grass #7DD03D  good-to-go #3AE593
+       dark-fir #00251A  mid-fir #003A29  light-fir #197D5F
+       light-blue #91D0DA  light-pink #FF99B6  amber #FFC845
+       neutrals n1 #FFFFFF n2 #EFF6E9 n3 #E4F0DA n4 #DBE4CB
+                n5 #C3CEAF n6 #A1AC8D n7 #717B63
+     ------------------------------------ */
+
   /* Keep UA widgets (scrollbars, form controls, date pickers) on the authored
      light design; without it they still render dark on a dark-mode OS. */
   color-scheme: light;
+
   --ob-bg: #ffffff;
-  --ob-fg: #14181f;
-  --ob-muted: #5b6472;
-  --ob-surface: #f5f7fa;
-  --ob-border: #dfe4ec;
-  --ob-accent: #0b5fff;
+  /* Dark fir as the ink colour: ~15:1 on white. */
+  --ob-fg: #00251a;
+  /* Deliberately darker than brand n7 (#717B63), which is only ~4.3:1 on white
+     and so fails AA for body text. This sits at ~6:1. */
+  --ob-muted: #56604b;
+  --ob-surface: #eff6e9;
+  --ob-border: #dbe4cb;
+  /* Light fir, ~4.7:1 on white — the accessible accent for links and buttons.
+     lfgreen is far too light for text on white; it is the accent for DARK
+     surfaces only, as --ob-brand-bright below. */
+  --ob-accent: #197d5f;
   --ob-accent-fg: #ffffff;
+
+  /* Brand extras for blocks and surfaces that need them. */
+  --ob-brand-bright: #abff44;
+  --ob-brand-grass: #7dd03d;
+  --ob-brand-go: #3ae593;
+  --ob-brand-ink: #00251a;
+  --ob-brand-ink-2: #003a29;
+  --ob-brand-fir: #197d5f;
+  --ob-brand-blue: #91d0da;
+  --ob-brand-pink: #ff99b6;
+  --ob-brand-amber: #ffc845;
+  --ob-n2: #eff6e9;
+  --ob-n3: #e4f0da;
+  --ob-n4: #dbe4cb;
+  --ob-n5: #c3ceaf;
+  --ob-n6: #a1ac8d;
+  --ob-n7: #717b63;
 
   /* Spacing scale */
   --ob-space-1: 4px;
@@ -33,8 +69,13 @@
   --ob-maxw: 1120px;
 
   /* Typography */
-  --ob-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Inter is the typeface the CMS's authored sections ask for. It is loaded by
+     next/font in app/layout.tsx, which SELF-HOSTS it at build time — that keeps
+     the CSP at style-src 'self' and font-src 'self' with no Google Fonts origin
+     to allowlist, and avoids a render-blocking third-party request. */
+  --ob-font: var(--ob-font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
 
   /* Elevation */
   --ob-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
@@ -101,6 +142,11 @@ ol[class] {
 }
 
 body {
+  /* Column layout for the site chrome: banner, header, main, footer. The
+     min-height plus a growing <main> keeps the footer at the bottom of the
+     viewport on short pages without position: fixed. */
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   background: var(--ob-bg);
   color: var(--ob-fg);
@@ -163,6 +209,42 @@ hr {
   max-width: var(--ob-maxw);
   margin-inline: auto;
   padding-inline: var(--ob-space-3);
+}
+
+/* The single page region, a direct flex child of body. It takes the slack so a
+   short page still pushes the footer to the bottom; min-width:0 stops a wide
+   child (a table, a long URL) from forcing the column wider than the viewport
+   and producing horizontal scroll at 360px. */
+.ob-main {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+/* Skip link: first focusable element in the body, off-screen until focused,
+   then a full 44px-tall target pinned over the top-left of the page. */
+.ob-skip-link {
+  position: absolute;
+  top: var(--ob-space-2);
+  left: var(--ob-space-2);
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--ob-space-2) var(--ob-space-3);
+  border-radius: var(--ob-radius);
+  background: var(--ob-accent);
+  color: var(--ob-accent-fg);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--ob-shadow);
+  /* Moved rather than display:none, so it stays in the focus order. */
+  transform: translateY(calc(-100% - var(--ob-space-4)));
+  transition: transform 120ms ease-out;
+}
+
+.ob-skip-link:focus-visible {
+  transform: translateY(0);
+  outline-offset: 3px;
 }
 
 .ob-sr-only {

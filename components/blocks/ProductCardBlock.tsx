@@ -29,6 +29,9 @@ export default function ProductCardBlock({ data, nodeKey, ctx }: BlockComponentP
   const titleId = `product-card-title-${nodeKey}`;
   const external = link ? isExternal(link.href) : false;
   const iconGlyph = icon ? emblem(icon) : "";
+  // The stretched overlay would swallow clicks on the per-field edit targets,
+  // so the full-card hit area is published-view only.
+  const stretch = !ctx?.isEditMode;
 
   return (
     <article className={styles.card} aria-labelledby={title ? titleId : undefined}>
@@ -61,13 +64,26 @@ export default function ProductCardBlock({ data, nodeKey, ctx }: BlockComponentP
 
         {link ? (
           <a
-            className={styles.cta}
+            className={`${styles.cta}${stretch ? ` ${styles.stretched}` : ""}`}
             href={link.href}
             {...(external ? { rel: "noopener noreferrer" } : {})}
             {...editable(ctx, data, "linkText", "linkLabel", "ctaText")}
           >
-            {label ?? "Learn more"}
-            {title && !label ? <span className={styles.srOnly}> — {title}</span> : null}
+            <span className={styles.ctaLabel}>
+              {label ?? "Learn more"}
+              {title && !label ? <span className={styles.srOnly}> — {title}</span> : null}
+            </span>
+            <span className={styles.arrow} aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" focusable="false">
+                <path
+                  d="M2.75 8h10.5M9 3.75 13.25 8 9 12.25"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
           </a>
         ) : null}
       </div>

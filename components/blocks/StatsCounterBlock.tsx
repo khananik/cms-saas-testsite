@@ -243,7 +243,7 @@ export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponent
                     {stat.label ?? full}
                   </dt>
                   <dd className={styles.value}>
-                    <span aria-hidden="true">
+                    <span className={styles.valueRow} aria-hidden="true">
                       {stat.prefix ? <span className={styles.affix}>{stat.prefix}</span> : null}
                       <span
                         className={styles.number}

@@ -20,10 +20,28 @@ import styles from "./FeaturedContentBlock.module.css";
  * serialises (its url, and a display name when Graph includes one) and renders
  * the optional editorial fields alongside it. With nothing authored it renders
  * nothing at all rather than an empty shell.
+ *
+ * Design: with an image the block is a media/text split whose sides alternate
+ * down the page; the side is derived from `nodeKey` so it is stable between
+ * server and client render and does not depend on sibling order. Without an
+ * image there is nothing to split, so the text becomes a tinted editorial
+ * callout instead of a half-empty two-column grid.
  */
 
 function isExternal(href: string): boolean {
   return /^https?:\/\//i.test(href);
+}
+
+/**
+ * Stable per-instance parity for the alternating layout. A hash of the node key
+ * rather than a render counter: deterministic on the server and on hydration.
+ */
+function flipsSides(key: string): boolean {
+  let hash = 0;
+  for (const char of key) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+  return hash % 2 === 1;
 }
 
 export default function FeaturedContentBlock({
@@ -81,22 +99,30 @@ export default function FeaturedContentBlock({
   return (
     <section
       className={styles.block}
+      data-layout={image ? "split" : "callout"}
       {...(headingId
         ? { "aria-labelledby": headingId }
         : { "aria-label": "Featured content" })}
     >
       <div className={styles.inner}>
-        <article className={styles.row}>
+        <article
+          className={styles.row}
+          data-flip={image && flipsSides(nodeKey) ? "true" : "false"}
+        >
           {image ? (
-            <div className={styles.media}>
-              <img
-                className={styles.image}
-                {...editable(ctx, data, "image", "media", "picture", "thumbnail", "photo")}
-                src={image.src}
-                alt={image.alt ?? imageAlt ?? ""}
-                loading="lazy"
-                decoding="async"
-              />
+            <div className={styles.frame}>
+              {/* Offset brand shape behind the picture — decoration only. */}
+              <span className={styles.flourish} aria-hidden="true" />
+              <div className={styles.media}>
+                <img
+                  className={styles.image}
+                  {...editable(ctx, data, "image", "media", "picture", "thumbnail", "photo")}
+                  src={image.src}
+                  alt={image.alt ?? imageAlt ?? ""}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </div>
           ) : null}
 
@@ -144,6 +170,9 @@ export default function FeaturedContentBlock({
                   : {})}
               >
                 {linkLabel ?? "Read more"}
+                <span className={styles.arrow} aria-hidden="true">
+                  &#8594;
+                </span>
               </a>
             ) : null}
           </div>

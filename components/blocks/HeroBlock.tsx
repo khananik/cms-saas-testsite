@@ -10,9 +10,10 @@ function isExternal(href: string): boolean {
 }
 
 /**
- * Full-width hero: large type over an optional background image with a
- * readable overlay, plus a single call to action. Stacks to one column
- * under 720px and stays gutter-safe at 360px.
+ * Full-width hero on a dark fir-ink surface: oversized display type, a
+ * subheadline at a comfortable measure, and a bright-green pill CTA. An
+ * optional background image sits behind a fir-tinted scrim. Single column
+ * throughout; gutter-safe at 360px.
  *
  * Field names below match the authored CMS schema (headline, subheadline,
  * ctaText, ctaLink, backgroundImage); the later names in each list are
@@ -37,6 +38,9 @@ export default function HeroBlock({ data, ctx }: BlockComponentProps) {
 
   return (
     <section className={styles.hero} data-has-image={image ? "true" : "false"}>
+      {/* Decorative brand wash; hidden by CSS when a background image is present. */}
+      <span className={styles.glow} aria-hidden="true" />
+
       {image ? (
         <div className={styles.media} aria-hidden="true">
           <img
@@ -52,6 +56,8 @@ export default function HeroBlock({ data, ctx }: BlockComponentProps) {
       ) : null}
 
       <div className={styles.inner}>
+        <span className={styles.rule} aria-hidden="true" />
+
         {heading ? (
           <h1
             className={styles.heading}

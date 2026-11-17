@@ -11,25 +11,48 @@
   box-sizing: border-box;
   max-width: var(--ob-maxw);
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ob-space-4);
+  align-items: start;
+}
+
+/* Heading + standfirst column. */
+.intro {
   display: flex;
   flex-direction: column;
   gap: var(--ob-space-3);
+  min-width: 0;
 }
 
 .heading {
   margin: 0;
-  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.125rem);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  max-width: 20ch;
+  font-size: clamp(1.625rem, 1.25rem + 1.6vw, 2.375rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ob-fg);
   overflow-wrap: anywhere;
+}
+
+/* Brand rule above the heading: decorative, drawn in the on-light accent. */
+.heading::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-bottom: var(--ob-space-3);
+  border-radius: 2px;
+  background: var(--ob-accent);
 }
 
 .description {
   margin: 0;
   color: var(--ob-muted);
   font-size: 1rem;
-  line-height: 1.6;
-  max-width: 68ch;
+  line-height: 1.65;
+  max-width: 46ch;
 }
 
 .description > :first-child {
@@ -44,103 +67,29 @@
   color: var(--ob-accent);
 }
 
+/* Hairline-separated rows: the list draws the opening rule, each FaqItemBlock
+   draws its own closing rule, so the set reads as one ruled column rather than
+   a stack of floating cards. */
 .list {
   list-style: none;
-  margin: var(--ob-space-2) 0 0;
+  margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ob-space-2);
+  min-width: 0;
+  border-top: 1px solid var(--ob-border);
 }
 
 .item {
-  background: var(--ob-surface);
-  border: 1px solid var(--ob-border);
-  border-radius: var(--ob-radius);
-  overflow: hidden;
-}
-
-.questionHeading {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ob-space-3);
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--ob-space-3);
-  background: transparent;
-  border: 0;
-  border-radius: var(--ob-radius);
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-
-.trigger:hover {
-  background: color-mix(in srgb, var(--ob-accent) 8%, transparent);
-}
-
-.trigger:focus-visible {
-  outline: 2px solid var(--ob-accent);
-  outline-offset: -2px;
-}
-
-.questionText {
   min-width: 0;
-  overflow-wrap: anywhere;
-  line-height: 1.45;
+  border-radius: var(--ob-radius);
+  transition: background-color 150ms ease;
 }
 
-.icon {
-  position: relative;
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-}
-
-.icon::before,
-.icon::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 16px;
-  height: 2px;
-  margin-top: -1px;
-  border-radius: 1px;
-  background: var(--ob-accent);
-  transition: transform 150ms ease;
-}
-
-.icon::after {
-  transform: rotate(90deg);
-}
-
-.icon[data-open="true"]::after {
-  transform: rotate(0deg);
-}
-
-.panel {
-  padding: 0 var(--ob-space-3) var(--ob-space-3);
-  border-top: 1px solid var(--ob-border);
-  color: var(--ob-fg);
-}
-
-.panel[hidden] {
-  display: none;
+.item:hover {
+  background: var(--ob-surface);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .icon::before,
-  .icon::after {
+  .item {
     transition: none;
   }
 }
@@ -149,12 +98,16 @@
   .block {
     padding: var(--ob-space-6) var(--ob-space-4);
   }
+}
 
-  .trigger {
-    padding: var(--ob-space-3) var(--ob-space-4);
+@media (min-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 330px) minmax(0, 1fr);
+    gap: var(--ob-space-5);
   }
 
-  .panel {
-    padding: 0 var(--ob-space-4) var(--ob-space-4);
+  .intro {
+    position: sticky;
+    top: var(--ob-space-4);
   }
 }

@@ -1,17 +1,50 @@
+/*
+ * Dark "fir ink" opener. Every colour here is a fixed brand token
+ * (--ob-brand-*, --ob-n*), never a theme token that flips under
+ * :root[data-theme="dark"], so the surface stays dark in both themes
+ * and the contrast figures below always hold.
+ *
+ * Locally scoped aliases keep the token names in one place.
+ */
 .hero {
+  --hero-surface: var(--ob-brand-ink);
+  --hero-fg: var(--ob-n2);
+  --hero-fg-muted: var(--ob-n5);
+  --hero-pop: var(--ob-brand-bright);
+
   position: relative;
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  background: var(--ob-surface);
-  color: var(--ob-fg);
+  background: var(--hero-surface);
+  color: var(--hero-fg);
   font-family: var(--ob-font);
+}
+
+/* Decorative depth: a fir wash off the top-right plus a faint grid of the
+   same, so the text-only hero still reads as designed. Behind content. */
+.glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 88% -10%,
+      color-mix(in srgb, var(--ob-brand-go) 22%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      80% 70% at 4% 108%,
+      color-mix(in srgb, var(--ob-brand-fir) 38%, transparent),
+      transparent 70%
+    );
 }
 
 .media {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
 }
 
 .image {
@@ -21,52 +54,74 @@
   object-fit: cover;
 }
 
+/* Fir-tinted scrim. Opaque enough that the worst-case pixel under the text
+   is still essentially --ob-brand-ink, which is what the ratios assume. */
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--ob-bg) 88%, transparent),
-    color-mix(in srgb, var(--ob-bg) 62%, transparent)
-  );
+  background:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--ob-brand-ink) 94%, transparent),
+      color-mix(in srgb, var(--ob-brand-ink) 78%, transparent)
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--ob-brand-ink-2) 72%, transparent),
+      transparent 70%
+    );
+}
+
+/* With a photo behind it the decorative wash would muddy the image. */
+.hero[data-has-image="true"] .glow {
+  display: none;
 }
 
 .inner {
   box-sizing: border-box;
   max-width: var(--ob-maxw);
   margin: 0 auto;
-  padding: var(--ob-space-6) var(--ob-space-3);
+  padding: clamp(var(--ob-space-6), 12vw, 128px) var(--ob-space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--ob-space-3);
+  align-items: flex-start;
+  gap: var(--ob-space-4);
 }
 
-.hero[data-has-image="true"] .inner {
-  max-width: var(--ob-maxw);
+/* Decorative bright-green rule: the brand signature, dark surface only. */
+.rule {
+  display: block;
+  width: 56px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hero-pop);
 }
 
 .heading {
   margin: 0;
-  font-size: clamp(2rem, 6vw, 3.5rem);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.25rem, 7.4vw, 4.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
   font-weight: 700;
-  max-width: 18ch;
+  max-width: 17ch;
+  text-wrap: balance;
   overflow-wrap: anywhere;
+  color: var(--hero-fg);
 }
 
 .subheading {
   margin: 0;
-  font-size: clamp(1.0625rem, 2.2vw, 1.375rem);
-  line-height: 1.5;
-  color: var(--ob-muted);
-  max-width: 56ch;
+  font-size: clamp(1.0625rem, 2.1vw, 1.3125rem);
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--hero-fg-muted);
+  max-width: 54ch;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ob-space-2);
+  gap: var(--ob-space-3);
   margin-top: var(--ob-space-2);
 }
 
@@ -74,39 +129,46 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: var(--ob-space-2) var(--ob-space-4);
-  border-radius: var(--ob-radius);
+  min-height: 48px;
+  padding: var(--ob-space-2) var(--ob-space-5);
+  border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  transition: opacity 120ms ease, background-color 120ms ease;
+  transition: transform 140ms ease, background-color 140ms ease;
 }
 
+/* Bright green pill, dark ink label: 13.4:1. */
 .ctaPrimary {
-  background: var(--ob-accent);
-  color: var(--ob-accent-fg);
-  box-shadow: var(--ob-shadow);
+  background: var(--hero-pop);
+  color: var(--ob-brand-ink);
 }
 
 .cta:hover {
-  opacity: 0.88;
+  background: color-mix(in srgb, var(--hero-pop) 86%, var(--ob-n2));
+  transform: translateY(-1px);
 }
 
 .cta:focus-visible {
-  outline: 2px solid var(--ob-accent);
+  outline: 2px solid var(--hero-pop);
   outline-offset: 3px;
 }
 
 @media (min-width: 720px) {
   .inner {
     padding-inline: var(--ob-space-4);
+    gap: var(--ob-space-5);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cta {
     transition: none;
+  }
+
+  .cta:hover {
+    transform: none;
   }
 }

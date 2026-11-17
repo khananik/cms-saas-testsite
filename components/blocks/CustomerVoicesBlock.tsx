@@ -211,6 +211,12 @@ export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockCompone
                 }}
               >
                 <figure className={styles.card}>
+                  {(voice.quoteHtml !== undefined || voice.quoteText !== undefined) && (
+                    <span className={styles.mark} aria-hidden="true">
+                      &ldquo;
+                    </span>
+                  )}
+
                   {voice.quoteHtml !== undefined ? (
                     <blockquote
                       className={styles.quote}

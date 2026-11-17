@@ -1,8 +1,31 @@
+/*
+ * Featured content — a light-surface editorial band.
+ *
+ * Two shapes, chosen in the component by whether an image was authored:
+ *   data-layout="split"   media + text, sides alternating via data-flip
+ *   data-layout="callout" text only, as a tinted panel with an accent rule
+ *
+ * Contrast (all on light surfaces, so the accent is --ob-accent #197d5f and
+ * NEVER --ob-brand-bright, which is ~1.4:1 on white):
+ *   --ob-fg    #00251a on --ob-bg      #ffffff  ~15.0:1
+ *   --ob-fg    #00251a on --ob-surface #eff6e9  ~13.5:1
+ *   --ob-muted #56604b on --ob-bg      #ffffff  ~6.6:1
+ *   --ob-muted #56604b on --ob-surface #eff6e9  ~6.0:1
+ *   --ob-accent#197d5f on --ob-bg      #ffffff  ~4.7:1
+ *   --ob-accent#197d5f on --ob-surface #eff6e9  ~4.6:1
+ *   --ob-accent-fg #ffffff on --ob-accent #197d5f ~5.1:1  (button)
+ *   focus ring --ob-accent on both page backgrounds  >= 4.6:1 (needs 3:1)
+ */
+
 .block {
   display: block;
+  /* The decorative flourish sits outside the frame; clipping here is what
+     guarantees no horizontal scroll at 360px. */
+  overflow: hidden;
   padding: var(--ob-space-6) var(--ob-space-3);
   background: var(--ob-bg);
   color: var(--ob-fg);
+  font-family: var(--ob-font);
 }
 
 .inner {
@@ -15,6 +38,31 @@
   grid-template-columns: 1fr;
   gap: var(--ob-space-4);
   align-items: center;
+}
+
+/* ---------- Media ---------- */
+
+.frame {
+  position: relative;
+  min-width: 0;
+  /* Keeps the flourish from pushing the grid column wider. */
+  isolation: isolate;
+}
+
+/* Offset brand-tinted shape behind the picture. Decorative, aria-hidden,
+   carries no information and no text. */
+.flourish {
+  position: absolute;
+  z-index: -1;
+  inset: var(--ob-space-4) calc(var(--ob-space-3) * -1) calc(var(--ob-space-3) * -1)
+    var(--ob-space-4);
+  border-radius: var(--ob-radius);
+  background: var(--ob-n3);
+}
+
+.row[data-flip="true"] .flourish {
+  inset: var(--ob-space-4) var(--ob-space-4) calc(var(--ob-space-3) * -1)
+    calc(var(--ob-space-3) * -1);
 }
 
 .media {
@@ -31,19 +79,60 @@
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
+
+/* ---------- Text ---------- */
 
 .text {
   min-width: 0;
 }
 
+/* Text-only: no split to make, so the copy becomes a deliberate callout
+   rather than a half-empty two-column grid. */
+.block[data-layout="callout"] .text {
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: var(--ob-space-4) var(--ob-space-4) var(--ob-space-4) var(--ob-space-5);
+  position: relative;
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+}
+
+/* The accent rule down the leading edge of the callout. Decorative. */
+.block[data-layout="callout"] .text::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--ob-space-4);
+  inset-inline-start: var(--ob-space-4);
+  width: 3px;
+  border-radius: 999px;
+  background: var(--ob-accent);
+}
+
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--ob-space-2);
   margin: 0 0 var(--ob-space-2);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ob-accent);
+}
+
+/* Short dash before the kicker — decorative, same accent as the text it
+   accompanies, so it clears 3:1 as a non-text mark either way. */
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .heading {
@@ -61,7 +150,7 @@
   margin: 0;
   max-width: 68ch;
   color: var(--ob-muted);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.65;
   overflow-wrap: break-word;
 }
@@ -81,16 +170,19 @@
 .body img {
   max-width: 100%;
   height: auto;
+  border-radius: var(--ob-radius);
 }
+
+/* ---------- Call to action ---------- */
 
 .link {
   display: inline-flex;
   align-items: center;
   /* Minimum comfortable tap target. */
   min-height: 44px;
-  gap: var(--ob-space-1);
-  margin-top: var(--ob-space-3);
-  padding: var(--ob-space-2) var(--ob-space-3);
+  gap: var(--ob-space-2);
+  margin-top: var(--ob-space-4);
+  padding: var(--ob-space-2) var(--ob-space-4);
   border-radius: var(--ob-radius);
   background: var(--ob-accent);
   color: var(--ob-accent-fg);
@@ -98,10 +190,13 @@
   font-size: 0.9375rem;
   text-decoration: none;
   border: 1px solid transparent;
+  box-shadow: var(--ob-shadow);
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
 .link:hover {
   text-decoration: underline;
+  transform: translateY(-1px);
 }
 
 .link:focus-visible {
@@ -109,15 +204,49 @@
   outline-offset: 2px;
 }
 
+.arrow {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+
+.link:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* ---------- Layout up ---------- */
+
 @media (min-width: 860px) {
-  .row {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--ob-space-5);
+  .block[data-layout="split"] .row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--ob-space-6);
+  }
+
+  /* Alternating sides. Source order stays media-then-text, so the reading
+     order and the DOM order never change — only the visual column does. */
+  .row[data-flip="true"] .frame {
+    order: 2;
+  }
+
+  .row[data-flip="true"] .text {
+    order: 1;
+  }
+
+  .block[data-layout="callout"] .row {
+    justify-items: center;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .link {
+  .link,
+  .arrow {
     transition: none;
+  }
+
+  .link:hover {
+    transform: none;
+  }
+
+  .link:hover .arrow {
+    transform: none;
   }
 }

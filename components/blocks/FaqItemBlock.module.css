@@ -1,5 +1,13 @@
+/* One question/answer row. Renders standalone on --ob-bg and nested inside the
+   FAQ container's --ob-surface card, so it carries no background of its own. */
 .item {
-  border-bottom: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+}
+
+/* Only draw a rule between consecutive items; a lone item sits flush inside its
+   card instead of ending on a stray line. */
+.item + .item {
+  border-top: 1px solid var(--ob-border);
 }
 
 .heading {
@@ -11,53 +19,79 @@
 
 .trigger {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--ob-space-3);
   width: 100%;
+  min-height: 44px;
   margin: 0;
-  padding: var(--ob-space-3) var(--ob-space-1);
+  padding: var(--ob-space-3);
   border: 0;
   border-radius: var(--ob-radius);
   background: transparent;
   color: var(--ob-fg);
   font-family: var(--ob-font);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   line-height: 1.45;
+  letter-spacing: -0.005em;
   text-align: left;
   cursor: pointer;
+  transition: background-color 160ms ease;
 }
 
-.trigger:hover .question {
-  color: var(--ob-accent);
+.trigger:hover {
+  background: color-mix(in srgb, var(--ob-accent) 7%, transparent);
+}
+
+.trigger:hover .chevron {
+  background: color-mix(in srgb, var(--ob-accent) 18%, transparent);
 }
 
 .trigger:focus-visible {
   outline: 2px solid var(--ob-accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .question {
   flex: 1 1 auto;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
+/* Brand-tinted disc; the glyph inside carries the contrast, the tint is decorative. */
 .chevron {
+  position: relative;
   flex: 0 0 auto;
-  width: 10px;
-  height: 10px;
-  margin-top: 6px;
-  border-right: 2px solid var(--ob-muted);
-  border-bottom: 2px solid var(--ob-muted);
-  transform: rotate(45deg);
-  transform-origin: 65% 65%;
-  transition: transform 200ms ease;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ob-accent) 10%, transparent);
+  transition: transform 220ms ease, background-color 160ms ease;
 }
 
+.chevron::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -6px 0 0 -4px;
+  border-right: 2px solid var(--ob-accent);
+  border-bottom: 2px solid var(--ob-accent);
+  transform: rotate(45deg);
+}
+
+/* Comes after the hover rule, so an open row keeps the solid accent disc. */
 .item[data-open="true"] .chevron {
-  transform: rotate(-135deg);
-  border-color: var(--ob-accent);
+  background: var(--ob-accent);
+  transform: rotate(180deg);
+}
+
+.item[data-open="true"] .chevron::before {
+  border-right-color: var(--ob-accent-fg);
+  border-bottom-color: var(--ob-accent-fg);
 }
 
 .panelOuter {
@@ -76,10 +110,13 @@
 }
 
 .answer {
-  padding: 0 var(--ob-space-1) var(--ob-space-3);
+  margin: 0 var(--ob-space-3);
+  padding: var(--ob-space-3) 0 var(--ob-space-4);
+  border-top: 1px solid var(--ob-border);
+  max-width: 68ch;
   color: var(--ob-muted);
-  font-size: 0.975rem;
-  line-height: 1.65;
+  font-size: 1rem;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
@@ -91,8 +128,60 @@
   margin-bottom: 0;
 }
 
+.answer p {
+  margin: 0 0 var(--ob-space-3);
+}
+
+.answer h2,
+.answer h3,
+.answer h4,
+.answer h5,
+.answer h6 {
+  margin: var(--ob-space-4) 0 var(--ob-space-2);
+  color: var(--ob-fg);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.answer strong,
+.answer b {
+  color: var(--ob-fg);
+}
+
+.answer ul,
+.answer ol {
+  margin: 0 0 var(--ob-space-3);
+  padding-left: var(--ob-space-4);
+}
+
+.answer li {
+  margin-bottom: var(--ob-space-2);
+}
+
+.answer li::marker {
+  color: var(--ob-accent);
+}
+
+.answer blockquote {
+  margin: var(--ob-space-3) 0;
+  padding: var(--ob-space-1) 0 var(--ob-space-1) var(--ob-space-3);
+  border-left: 3px solid var(--ob-accent);
+  color: var(--ob-fg);
+}
+
 .answer a {
   color: var(--ob-accent);
+  text-underline-offset: 2px;
+}
+
+.answer a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.answer a:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
+  border-radius: var(--ob-space-1);
 }
 
 .answer img {
@@ -104,6 +193,7 @@
 .answer table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9375rem;
 }
 
 .answer th,
@@ -113,16 +203,41 @@
   text-align: left;
 }
 
+.answer th {
+  background: var(--ob-surface);
+  color: var(--ob-fg);
+  font-weight: 600;
+}
+
+.answer pre,
+.answer code {
+  font-size: 0.9375rem;
+}
+
 .answer pre {
   padding: var(--ob-space-3);
+  border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius);
   background: var(--ob-surface);
+  color: var(--ob-fg);
   overflow-x: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .trigger,
   .panelOuter,
   .chevron {
     transition: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .trigger {
+    padding: var(--ob-space-3) var(--ob-space-4);
+  }
+
+  .answer {
+    margin: 0 var(--ob-space-4);
+    padding-bottom: var(--ob-space-5);
   }
 }

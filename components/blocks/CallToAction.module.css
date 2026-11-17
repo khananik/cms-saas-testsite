@@ -2,9 +2,12 @@
   width: 100%;
   font-family: var(--ob-font);
   color: var(--ob-fg);
+  padding: 0 var(--ob-space-3);
+  box-sizing: border-box;
 }
 
 .inner {
+  position: relative;
   box-sizing: border-box;
   max-width: var(--ob-maxw);
   margin: 0 auto;
@@ -15,19 +18,36 @@
   gap: var(--ob-space-3);
   text-align: center;
   border-radius: var(--ob-radius);
+  overflow: hidden;
 }
 
-/* Button-only instances (the common case here) sit tighter than a full banner. */
+/* Button-only instances (the common case here) still read as a band, just shorter. */
 .inner:has(> .actions:only-child) {
   padding: var(--ob-space-4) var(--ob-space-3);
 }
 
 /* ---------- Variants ---------- */
 
+/* Default band: deep fir ink, the dark surface the bright green belongs on. */
 .cta[data-variant="accent"] .inner {
-  background: var(--ob-accent);
+  background: var(--ob-brand-ink);
+  background-image: linear-gradient(160deg, var(--ob-brand-ink-2) 0%, var(--ob-brand-ink) 62%);
   color: var(--ob-accent-fg);
   box-shadow: var(--ob-shadow);
+}
+
+/* A soft bright-green bloom in the corner — decoration only, never behind text. */
+.cta[data-variant="accent"] .inner::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: -12%;
+  inset-block-start: -55%;
+  inline-size: 55%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ob-brand-fir) 0%, transparent 70%);
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .cta[data-variant="muted"] .inner {
@@ -44,20 +64,28 @@
 
 /* ---------- Content ---------- */
 
+.heading,
+.body,
+.actions {
+  position: relative;
+  z-index: 1;
+}
+
 .heading {
   margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  line-height: 1.15;
-  letter-spacing: -0.015em;
+  font-size: clamp(1.625rem, 4.5vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   font-weight: 700;
-  max-width: 24ch;
+  max-width: 22ch;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
 .body {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.65;
-  max-width: 60ch;
+  max-width: 56ch;
 }
 
 .body > :first-child {
@@ -68,15 +96,19 @@
   margin-bottom: 0;
 }
 
-.body a {
-  color: inherit;
-  text-underline-offset: 2px;
-}
-
 .body img {
   max-width: 100%;
   height: auto;
   border-radius: var(--ob-radius);
+}
+
+.cta[data-variant="accent"] .body {
+  color: var(--ob-n5);
+}
+
+.cta[data-variant="accent"] .body a {
+  color: var(--ob-brand-bright);
+  text-underline-offset: 3px;
 }
 
 .cta[data-variant="muted"] .body,
@@ -87,6 +119,7 @@
 .cta[data-variant="muted"] .body a,
 .cta[data-variant="outline"] .body a {
   color: var(--ob-accent);
+  text-underline-offset: 3px;
 }
 
 /* ---------- Action ---------- */
@@ -96,30 +129,39 @@
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
+  margin-block-start: var(--ob-space-1);
 }
 
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  gap: var(--ob-space-2);
+  min-height: 48px;
   min-width: 44px;
   max-width: 100%;
   padding: var(--ob-space-2) var(--ob-space-4);
-  border-radius: var(--ob-radius);
+  /* Pill. */
+  border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
   overflow-wrap: anywhere;
-  transition: opacity 120ms ease, background-color 120ms ease;
+  transition: transform 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
 }
 
+/* Bright green on near-black fir: the brand signature, dark ink text on top. */
 .cta[data-variant="accent"] .button {
-  background: var(--ob-accent-fg);
-  color: var(--ob-accent);
+  background: var(--ob-brand-bright);
+  color: var(--ob-brand-ink);
+}
+
+.cta[data-variant="accent"] .button:hover {
+  background: var(--ob-brand-grass);
 }
 
 .cta[data-variant="muted"] .button,
@@ -129,8 +171,31 @@
   box-shadow: var(--ob-shadow);
 }
 
+.cta[data-variant="muted"] .button:hover,
+.cta[data-variant="outline"] .button:hover {
+  background: var(--ob-brand-ink-2);
+}
+
 .button:hover {
-  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+/* Decorative chevron. Generated content with empty alternative text so it is
+   never announced; the authored label carries the meaning. */
+.button::after {
+  content: "\2192" / "";
+  flex: none;
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform 140ms ease;
+}
+
+.button:hover::after {
+  transform: translateX(3px);
 }
 
 .button:focus-visible {
@@ -139,7 +204,7 @@
 }
 
 .cta[data-variant="accent"] .button:focus-visible {
-  outline-color: var(--ob-accent-fg);
+  outline-color: var(--ob-brand-bright);
 }
 
 @media (min-width: 720px) {
@@ -150,10 +215,21 @@
   .inner:has(> .actions:only-child) {
     padding: var(--ob-space-5);
   }
+
+  .button {
+    padding: var(--ob-space-2) var(--ob-space-5);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .button {
+  .button,
+  .button::after {
     transition: none;
+  }
+
+  .button:hover,
+  .button:hover::after,
+  .button:active {
+    transform: none;
   }
 }

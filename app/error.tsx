@@ -25,7 +25,7 @@ export default function GlobalError({
   }, [error.digest]);
 
   return (
-    <main className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
+    <div className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
       <h1>Something went wrong</h1>
       <p style={{ color: "var(--ob-muted)", marginTop: "var(--ob-space-3)" }}>
         We couldn&rsquo;t load this page right now. Please try again in a moment.
@@ -50,6 +50,6 @@ export default function GlobalError({
           Try again
         </button>
       </p>
-    </main>
+    </div>
   );
 }

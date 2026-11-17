@@ -77,6 +77,7 @@ export default function LogoGridBlock({ data, nodeKey, ctx }: BlockComponentProp
       <div className={styles.inner}>
         {(heading || subheading) && (
           <div className={logos.length > 0 ? styles.header : styles.headerOnly}>
+            {heading && <span className={styles.flourish} aria-hidden="true" />}
             {heading && (
               <h2
                 id={headingId}

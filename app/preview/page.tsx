@@ -51,12 +51,12 @@ function PreviewUnavailable({
 }) {
   return (
     <>
-      <main className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
+      <div className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
         <h1>Preview unavailable</h1>
         <p style={{ color: "var(--ob-muted)", marginTop: "var(--ob-space-3)" }}>
           This preview could not be loaded. Please reopen the preview from the CMS.
         </p>
-      </main>
+      </div>
       {/* The bridge still loads on failure so the CMS edit view can connect and a
           re-save can refresh the frame instead of leaving the editor stuck. */}
       {cmsHost ? <PreviewBridge cmsHost={cmsHost} nonce={nonce} /> : null}
@@ -126,12 +126,12 @@ export default async function PreviewPage({
 
   return (
     <>
-      <main lang={loc ?? undefined}>
+      <div lang={loc ?? undefined}>
         <ExperienceRenderer
           composition={content.composition ?? null}
           ctx={{ isEditMode: ctx === "edit", locale: loc }}
         />
-      </main>
+      </div>
       {cmsHost ? <PreviewBridge cmsHost={cmsHost} nonce={nonce} version={ver} /> : null}
     </>
   );

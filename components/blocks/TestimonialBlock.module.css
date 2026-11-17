@@ -1,75 +1,119 @@
 .block {
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-5) var(--ob-space-3);
+  padding: var(--ob-space-6) var(--ob-space-3);
   background: var(--ob-bg);
   color: var(--ob-fg);
 }
 
+/* The card is a dark fir slab on the light page: it breaks the rhythm of the
+   surrounding light sections and is the one place --ob-brand-bright is legal,
+   because it only ever sits on --ob-brand-ink here. The ink/neutral tokens used
+   inside are theme-stable, so the card keeps its contrast under data-theme. */
 .figure {
+  position: relative;
   box-sizing: border-box;
-  max-width: var(--ob-maxw);
+  max-width: min(var(--ob-maxw), 56rem);
   margin: 0 auto;
-  padding: var(--ob-space-4);
+  padding: var(--ob-space-5) var(--ob-space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--ob-space-3);
-  background: var(--ob-surface);
-  border: 1px solid var(--ob-border);
+  gap: var(--ob-space-4);
+  overflow: hidden;
+  background: var(--ob-brand-ink);
+  color: var(--ob-n2);
+  border: 1px solid var(--ob-brand-ink-2);
   border-radius: var(--ob-radius);
   box-shadow: var(--ob-shadow);
   font-family: var(--ob-font);
 }
 
+/* Decorative wash in the top-right corner; aria-hidden element in the markup. */
+.glow {
+  position: absolute;
+  inset-block-start: calc(var(--ob-space-6) * -1);
+  inset-inline-end: calc(var(--ob-space-6) * -1);
+  width: 16rem;
+  height: 16rem;
+  border-radius: 50%;
+  background: var(--ob-brand-fir);
+  opacity: 0.22;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
 .rating {
+  position: relative;
   margin: 0;
   display: flex;
   gap: var(--ob-space-1);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1;
 }
 
 .starOn {
-  color: var(--ob-accent);
+  color: var(--ob-brand-bright);
 }
 
 .starOff {
-  color: var(--ob-border);
+  color: var(--ob-n7);
 }
 
 .quote {
+  position: relative;
   margin: 0;
-  font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.375rem);
-  line-height: 1.55;
-  color: var(--ob-fg);
+  max-width: 34ch;
+  font-size: clamp(1.375rem, 1.05rem + 1.45vw, 2rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--ob-n2);
+}
+
+/* Oversized pull-quote mark. Laid out in flow rather than absolutely
+   positioned so it can never widen the card at 360px. */
+.mark {
+  display: block;
+  margin-bottom: calc(var(--ob-space-2) * -1);
+  font-size: clamp(3.5rem, 11vw, 5.5rem);
+  line-height: 0.62;
+  font-weight: 700;
+  color: var(--ob-brand-bright);
+  opacity: 0.7;
 }
 
 .quote p {
   margin: 0;
   overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
-.block a:focus-visible {
-  outline: 2px solid var(--ob-accent);
+.block a:focus-visible,
+.figure :focus-visible {
+  outline: 2px solid var(--ob-brand-bright);
   outline-offset: 2px;
   border-radius: calc(var(--ob-radius) / 2);
 }
 
 .caption {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--ob-space-3);
-  padding-top: var(--ob-space-3);
-  border-top: 1px solid var(--ob-border);
+  padding-top: var(--ob-space-4);
+  border-top: 1px solid var(--ob-n7);
 }
 
+/* Avatar well: ring + recessed fill so the slot reads deliberately even when
+   the CMS reference does not resolve to an image. */
 .avatar {
   flex: 0 0 auto;
   width: 56px;
   height: 56px;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--ob-border);
+  background: var(--ob-brand-ink-2);
+  box-shadow: 0 0 0 2px var(--ob-n7);
 }
 
 .captionText {
@@ -80,18 +124,27 @@
 }
 
 .authorName {
+  font-size: 1rem;
   font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ob-n2);
   overflow-wrap: anywhere;
 }
 
 .authorMeta {
   font-size: 0.9375rem;
-  color: var(--ob-muted);
+  line-height: 1.4;
+  color: var(--ob-n5);
   overflow-wrap: anywhere;
 }
 
 @media (min-width: 640px) {
   .figure {
-    padding: var(--ob-space-5);
+    padding: var(--ob-space-6) var(--ob-space-5);
+    gap: var(--ob-space-5);
+  }
+
+  .quote {
+    max-width: 24ch;
   }
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
+    <div className="ob-container" style={{ paddingBlock: "var(--ob-space-6)" }}>
       <h1>Page not found</h1>
       <p style={{ color: "var(--ob-muted)", marginTop: "var(--ob-space-3)" }}>
         We couldn&rsquo;t find the page you were looking for. It may have been moved or
@@ -11,6 +11,6 @@ export default function NotFound() {
       <p style={{ marginTop: "var(--ob-space-4)" }}>
         <Link href="/">Back to the home page</Link>
       </p>
-    </main>
+    </div>
   );
 }

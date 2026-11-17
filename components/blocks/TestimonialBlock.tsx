@@ -82,6 +82,8 @@ export default function TestimonialBlock({ data, ctx }: BlockComponentProps) {
   return (
     <section className={styles.block}>
       <figure className={styles.figure}>
+        <span className={styles.glow} aria-hidden="true" />
+
         {rating !== undefined ? (
           <p
             className={styles.rating}
@@ -102,6 +104,11 @@ export default function TestimonialBlock({ data, ctx }: BlockComponentProps) {
 
         {quote ? (
           <blockquote className={styles.quote}>
+            {/* Decorative pull-quote mark: the quote text itself carries the
+                meaning, so this is hidden from assistive tech. */}
+            <span className={styles.mark} aria-hidden="true">
+              {"“"}
+            </span>
             <p
               {...editable(
                 ctx,

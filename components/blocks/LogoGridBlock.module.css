@@ -1,8 +1,12 @@
+/* A brand-tinted band: the block is usually heading + subheading only, so the
+   band is what makes the pair look deliberate rather than stranded on white. */
 .section {
   width: 100%;
-  padding: var(--ob-space-5) var(--ob-space-3);
-  background: var(--ob-bg);
+  padding: var(--ob-space-6) var(--ob-space-3);
+  background: var(--ob-surface);
   color: var(--ob-fg);
+  border-top: 1px solid var(--ob-border);
+  border-bottom: 1px solid var(--ob-border);
 }
 
 .inner {
@@ -12,30 +16,44 @@
 
 .header {
   text-align: center;
-  margin-bottom: var(--ob-space-4);
+  max-width: 44rem;
+  margin: 0 auto var(--ob-space-5);
 }
 
 /* No logos resolved: the heading/subheading stand alone, with no gap below. */
 .headerOnly {
   text-align: center;
-  margin-bottom: 0;
   max-width: 44rem;
   margin-inline: auto;
+  margin-bottom: 0;
+}
+
+/* Decorative only — carries no information that the heading does not. */
+.flourish {
+  display: block;
+  width: 56px;
+  height: 4px;
+  margin: 0 auto var(--ob-space-3);
+  border-radius: 999px;
+  background: var(--ob-accent);
 }
 
 .heading {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.5rem, 1.15rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
   color: var(--ob-fg);
 }
 
 .subheading {
-  margin: var(--ob-space-2) 0 0;
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  margin: var(--ob-space-3) auto 0;
+  max-width: 38rem;
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  line-height: 1.65;
+  text-wrap: pretty;
   color: var(--ob-muted);
 }
 
@@ -44,34 +62,43 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--ob-space-3);
   justify-items: center;
   align-items: center;
 }
 
+/* White cards lift the logos off the tinted band. */
 .item {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 64px;
-  padding: var(--ob-space-2);
-  border: 1px solid var(--ob-border);
+  min-height: 88px;
+  padding: var(--ob-space-3);
+  border: 1px solid var(--ob-n5);
   border-radius: var(--ob-radius);
-  background: var(--ob-surface);
+  background: var(--ob-bg);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.item:hover,
+.item:focus-within {
+  border-color: var(--ob-accent);
+  box-shadow: var(--ob-shadow);
+  transform: translateY(-2px);
 }
 
 .logo {
   display: block;
   max-width: 100%;
-  max-height: 40px;
+  max-height: 44px;
   width: auto;
   height: auto;
   object-fit: contain;
   filter: grayscale(100%);
-  opacity: 0.75;
-  transition: filter 160ms ease, opacity 160ms ease, transform 160ms ease;
+  opacity: 0.7;
+  transition: filter 160ms ease, opacity 160ms ease;
 }
 
 .link {
@@ -103,7 +130,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo {
+  .logo,
+  .item {
     transition: none;
+  }
+
+  .item:hover,
+  .item:focus-within {
+    transform: none;
   }
 }

@@ -130,25 +130,31 @@ export default function FaqContainerBlock({ data, nodeKey, ctx }: BlockComponent
 
   if (entries.length === 0 && !heading && !descriptionHtml) return null;
 
+  const hasIntro = Boolean(heading) || Boolean(descriptionHtml);
+
   return (
     <section className={styles.block} aria-labelledby={heading ? headingId : undefined}>
-      <div className={styles.inner}>
-        {heading ? (
-          <h2
-            className={styles.heading}
-            id={headingId}
-            {...editable(ctx, data, "heading", "title", "headline", "header", "name")}
-          >
-            {heading}
-          </h2>
-        ) : null}
+      <div className={`${styles.inner} ${hasIntro && entries.length > 0 ? styles.split : ""}`.trim()}>
+        {hasIntro ? (
+          <div className={styles.intro}>
+            {heading ? (
+              <h2
+                className={styles.heading}
+                id={headingId}
+                {...editable(ctx, data, "heading", "title", "headline", "header", "name")}
+              >
+                {heading}
+              </h2>
+            ) : null}
 
-        {descriptionHtml ? (
-          <div
-            className={styles.description}
-            {...editable(ctx, data, "description", "intro", "body", "text", "summary", "subheading")}
-            dangerouslySetInnerHTML={{ __html: descriptionHtml }}
-          />
+            {descriptionHtml ? (
+              <div
+                className={styles.description}
+                {...editable(ctx, data, "description", "intro", "body", "text", "summary", "subheading")}
+                dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+              />
+            ) : null}
+          </div>
         ) : null}
 
         {entries.length > 0 ? (

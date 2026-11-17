@@ -1,0 +1,222 @@
+/* ============================================================
+   Site footer. Full-bleed dark fir panel with lfgreen accents —
+   the dark surface is exactly where the bright green belongs.
+
+   Two layouts off one attribute:
+     [data-layout="columns"]  lockup left, link columns right
+     [data-layout="mark"]     no columns authored: the wordmark
+                              and tagline become a centred
+                              statement rather than an orphan line
+   ============================================================ */
+
+.footer {
+  width: 100%;
+  font-family: var(--ob-font);
+  /* Fixed brand surface, so the foreground is a fixed light token rather than
+     a theme-dependent one. */
+  background: var(--ob-brand-ink);
+  color: var(--ob-n2);
+  margin-top: var(--ob-space-6);
+}
+
+.inner {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding: var(--ob-space-6) var(--ob-space-3) var(--ob-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-5);
+}
+
+/* ---------- Wordmark + tagline ---------- */
+
+.lockup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-2);
+  min-width: 0;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ob-space-1);
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ob-n2);
+  overflow-wrap: anywhere;
+}
+
+/* The brand full stop. */
+.pip {
+  flex: none;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 50%;
+  background: var(--ob-brand-bright);
+}
+
+.tagline {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 44ch;
+  /* n4 on fir ink is ~11:1 — quieter than the wordmark, still well clear of AA. */
+  color: var(--ob-n4);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- No columns authored ----------
+   Centre the lockup, give it air and a bright keyline so the panel reads as a
+   deliberate sign-off rather than a leftover line of text. */
+
+.footer[data-layout="mark"] .inner {
+  padding-block: var(--ob-space-6);
+  align-items: center;
+  text-align: center;
+}
+
+.footer[data-layout="mark"] .lockup {
+  align-items: center;
+  gap: var(--ob-space-3);
+  padding-top: var(--ob-space-4);
+  /* Short bright rule above the mark — the only ornament the empty state needs. */
+  border-top: 2px solid var(--ob-brand-bright);
+}
+
+.footer[data-layout="mark"] .wordmark {
+  font-size: clamp(1.75rem, 6vw, 2.75rem);
+}
+
+.footer[data-layout="mark"] .tagline {
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  color: var(--ob-n3);
+}
+
+/* ---------- Link columns ---------- */
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ob-space-4);
+  min-width: 0;
+}
+
+.column {
+  min-width: 0;
+}
+
+.columnHeading {
+  margin: 0 0 var(--ob-space-2);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ob-brand-bright);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  /* 44px tap target for thumbs on a phone. */
+  min-height: 44px;
+  padding-block: var(--ob-space-1);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--ob-n3);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 120ms ease;
+}
+
+.link:hover {
+  color: var(--ob-brand-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--ob-brand-bright);
+  outline-offset: 3px;
+  border-radius: var(--ob-space-1);
+}
+
+/* ---------- Legal row ---------- */
+
+.legal {
+  border-top: 1px solid var(--ob-brand-ink-2);
+}
+
+.legalInner {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding: var(--ob-space-3);
+}
+
+.copyright {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  /* n5 on fir ink is ~7:1. */
+  color: var(--ob-n5);
+  overflow-wrap: anywhere;
+}
+
+.footer[data-layout="mark"] .copyright {
+  text-align: center;
+}
+
+/* ---------- Wider viewports ---------- */
+
+@media (min-width: 640px) {
+  .footer[data-layout="columns"] .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .inner {
+    padding-inline: var(--ob-space-5);
+  }
+
+  .legalInner {
+    padding-inline: var(--ob-space-5);
+  }
+
+  .footer[data-layout="columns"] .inner {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ob-space-6);
+  }
+
+  .footer[data-layout="columns"] .lockup {
+    flex: 0 1 32ch;
+  }
+
+  .footer[data-layout="columns"] .columns {
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--ob-space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

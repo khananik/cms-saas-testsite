@@ -12,13 +12,14 @@
 .block.solo {
   padding: 0;
   background: transparent;
-  flex: 1 1 11rem;
+  flex: 1 1 13rem;
   min-width: 0;
 }
 
 .inner {
   max-width: var(--ob-maxw);
   margin: 0 auto;
+  height: 100%;
 }
 
 .solo .inner {
@@ -28,7 +29,8 @@
 .heading {
   font-family: var(--ob-font);
   font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   margin: 0;
   text-wrap: balance;
 }
@@ -37,11 +39,12 @@
   color: var(--ob-muted);
   margin: var(--ob-space-2) 0 0;
   max-width: 60ch;
+  line-height: 1.6;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
   gap: var(--ob-space-3);
   margin: var(--ob-space-5) 0 0;
   padding: 0;
@@ -50,31 +53,58 @@
 .solo .grid {
   grid-template-columns: 1fr;
   margin: 0;
+  height: 100%;
 }
 
+/*
+ * The card. Siblings in a row stretch to a shared height, and every card carries
+ * the same brand rule along its top edge so a row reads as one deliberate set
+ * even though each stat is a separate CMS block.
+ */
 .item {
+  position: relative;
   display: flex;
   flex-direction: column-reverse;
-  gap: var(--ob-space-1);
+  justify-content: flex-end;
+  gap: var(--ob-space-2);
   background: var(--ob-surface);
   border: 1px solid var(--ob-border);
   border-radius: var(--ob-radius);
   box-shadow: var(--ob-shadow);
-  padding: var(--ob-space-4) var(--ob-space-3);
+  padding: var(--ob-space-4) var(--ob-space-4) var(--ob-space-4);
   min-width: 0;
   height: 100%;
+  overflow: hidden;
+}
+
+/* Decorative brand rule; purely ornamental, carries no information. */
+.item::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--ob-brand-fir), var(--ob-brand-grass));
+  pointer-events: none;
 }
 
 .value {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+  font-size: clamp(2.75rem, 1.9rem + 4vw, 4.25rem);
   font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  line-height: 1;
+  letter-spacing: -0.045em;
   color: var(--ob-accent);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
+}
+
+/* Keeps the suffix sitting on the numeral's baseline rather than its box. */
+.valueRow {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
 }
 
 .number {
@@ -82,17 +112,21 @@
 }
 
 .affix {
-  font-size: 0.6em;
+  font-size: 0.5em;
   font-weight: 600;
-  color: var(--ob-fg);
-  margin-inline-start: 0.04em;
+  letter-spacing: -0.01em;
+  color: var(--ob-accent);
+  margin-inline-start: 0.08em;
 }
 
 .label {
   margin: 0;
   color: var(--ob-muted);
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
@@ -108,6 +142,12 @@
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+@media (max-width: 23.4375rem) {
+  .item {
+    padding: var(--ob-space-3);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

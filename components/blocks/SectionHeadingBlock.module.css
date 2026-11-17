@@ -1,7 +1,8 @@
 .block {
   box-sizing: border-box;
   width: 100%;
-  padding: var(--ob-space-5) var(--ob-space-3);
+  /* Generous above, tighter below: the header binds to the content it introduces. */
+  padding: var(--ob-space-5) var(--ob-space-3) var(--ob-space-4);
   color: var(--ob-fg);
 }
 
@@ -29,13 +30,23 @@
   align-items: flex-end;
 }
 
+/* Decorative accent rule above the heading. aria-hidden in markup. */
+.rule {
+  flex: none;
+  width: 48px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ob-accent);
+}
+
 .eyebrow {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  line-height: 1.4;
   color: var(--ob-accent);
   overflow-wrap: anywhere;
 }
@@ -43,22 +54,34 @@
 .heading {
   margin: 0;
   font-family: var(--ob-font);
-  font-size: clamp(1.5rem, 1.15rem + 1.6vw, 2.25rem);
-  line-height: 1.2;
+  font-size: clamp(1.75rem, 1.25rem + 2.2vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   font-weight: 700;
   color: var(--ob-fg);
+  max-width: 22ch;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
+.alignCenter .heading {
+  margin-inline: auto;
+}
+
 .subheading {
   margin: 0;
-  max-width: 68ch;
+  /* Constrained measure so the intro reads as one calm paragraph. */
+  max-width: 60ch;
   font-family: var(--ob-font);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  line-height: 1.65;
   color: var(--ob-muted);
+  text-wrap: pretty;
   overflow-wrap: anywhere;
+}
+
+.alignCenter .subheading {
+  margin-inline: auto;
 }
 
 .subheading > :first-child {
@@ -80,9 +103,28 @@
   text-align: start;
 }
 
+.subheading strong,
+.subheading b {
+  color: var(--ob-fg);
+  font-weight: 650;
+}
+
 .subheading a {
   color: var(--ob-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+  transition: text-decoration-thickness 120ms ease;
+}
+
+.subheading a:hover {
+  text-decoration-thickness: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subheading a {
+    transition: none;
+  }
 }
 
 .subheading a:focus-visible,
@@ -107,10 +149,14 @@
 
 @media (min-width: 640px) {
   .block {
-    padding: var(--ob-space-6) var(--ob-space-4);
+    padding: var(--ob-space-6) var(--ob-space-4) var(--ob-space-5);
   }
 
   .inner {
     gap: var(--ob-space-3);
+  }
+
+  .rule {
+    width: 56px;
   }
 }

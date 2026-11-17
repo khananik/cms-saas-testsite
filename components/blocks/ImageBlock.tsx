@@ -30,14 +30,18 @@ export default function ImageBlock({ data, ctx }: BlockComponentProps) {
 
   return (
     <figure className={styles.block}>
-      <img
-        className={styles.image}
-        src={image.src}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        {...editable(ctx, data, "image", "media", "picture")}
-      />
+      {/* Presentational frame: owns the radius, border and elevation so the
+          image can never paint over a rounded corner. No semantics added. */}
+      <div className={styles.frame}>
+        <img
+          className={styles.image}
+          src={image.src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          {...editable(ctx, data, "image", "media", "picture")}
+        />
+      </div>
       {caption ? (
         <figcaption
           className={styles.caption}

@@ -103,11 +103,11 @@ export default async function Page({
     /* Full-bleed wrapper: BlankSection and each block own their own gutter and
        max-width, so adding ob-container here would double the padding and make
        full-bleed blocks impossible. lang carries the CMS locale of the content. */
-    <main lang={locale}>
+    <div lang={locale}>
       <ExperienceRenderer
         composition={page.composition ?? null}
         ctx={{ isEditMode: false, locale }}
       />
-    </main>
+    </div>
   );
 }
