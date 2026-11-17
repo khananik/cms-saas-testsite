@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { OPTIMIZELY_FRAME_ORIGIN } from "./lib/optimizely";
+
 /**
  * The single Content-Security-Policy for this site, built per request.
  *
@@ -69,7 +71,11 @@ export default function proxy(request: NextRequest) {
     "img-src 'self' https: data: blob:",
     "font-src 'self' data:",
     "connect-src 'self' https:",
-    `frame-src 'self'${cmsSource}`,
+    // Optimizely Web's snippet embeds an iframe from its project-specific origin.
+    // The snippet itself needs no script-src entry: under 'strict-dynamic' host
+    // allowlists are ignored, so the nonce on its tag (app/layout.tsx) is what
+    // authorises it.
+    `frame-src 'self'${cmsSource} ${OPTIMIZELY_FRAME_ORIGIN}`,
     // Clickjacking / embedding control: only this origin and the CMS may frame the site.
     // Never widen this to a wildcard. X-Frame-Options is intentionally not set — it cannot
     // express an allowlist and a SAMEORIGIN value would contradict this directive.
