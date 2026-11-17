@@ -370,6 +370,56 @@ export async function getPageByPath(
 }
 
 /* -------------------------------------------------------------------------- */
+/* Page SEO title                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The editor-authored SEO title lives on the `SEO` content contract. Graph refuses
+ * `... on SEO` inside `_Experience` ("can never be of type SEO"), so it is read
+ * through the root `_Content` interface instead, matched on the same URL.
+ *
+ * Kept as its own query on purpose: `SEO` is instance-specific, and on an instance
+ * without it this query fails on its own without taking the page query down.
+ */
+export const PAGE_META_TITLE_QUERY = `
+  query PageMetaTitle($path: String!) {
+    _Content(
+      where: { _metadata: { url: { default: { eq: $path } } } }
+      limit: 1
+    ) {
+      items { ... on SEO { metaTitle } }
+    }
+  }
+`;
+
+type PageMetaTitleResult = {
+  _Content?: { items?: ({ metaTitle?: unknown } | null)[] | null } | null;
+};
+
+/** Longer than any sensible title; a runaway value is truncated, not rendered whole. */
+const MAX_META_TITLE_LENGTH = 200;
+
+/**
+ * The page's CMS `metaTitle`, trimmed, or undefined when the page has none.
+ * GraphError propagates to the caller.
+ */
+export async function getPageMetaTitle(path: string): Promise<string | undefined> {
+  const normalisedPath = normalisePath(path);
+  if (!normalisedPath) return undefined;
+
+  const result = await graphQuery<PageMetaTitleResult>({
+    query: PAGE_META_TITLE_QUERY,
+    variables: { path: normalisedPath },
+  });
+
+  const items = result?._Content?.items;
+  const value = Array.isArray(items) ? items[0]?.metaTitle : undefined;
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, MAX_META_TITLE_LENGTH) : undefined;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Published page list (sitemap)                                              */
 /* -------------------------------------------------------------------------- */
 

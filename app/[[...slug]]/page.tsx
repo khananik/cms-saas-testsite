@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import ExperienceRenderer from "@/components/ExperienceRenderer";
-import { getPageByPath } from "@/lib/queries";
+import { getPageByPath, getPageMetaTitle } from "@/lib/queries";
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -73,6 +73,16 @@ export async function generateMetadata({
   const { slug } = await params;
   const path = buildPath(slug);
   if (path === null) return { title: "testsiteanik" };
+
+  // The editor's SEO title wins, used exactly as authored. Looked up separately so a
+  // failure here (e.g. an instance without the SEO contract) only loses this
+  // preference, not the display-name fallback below.
+  try {
+    const metaTitle = await getPageMetaTitle(path);
+    if (metaTitle) return { title: metaTitle };
+  } catch {
+    // Fall through to the display name.
+  }
 
   try {
     const page = await getPageByPath(path);
