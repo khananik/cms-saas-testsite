@@ -1,10 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
-import {
-  pickHtml,
-  pickImage,
-  pickNumber,
-  pickString,
-} from "@/lib/fields";
+import { pickImage, pickNumber, pickString } from "@/lib/fields";
 import styles from "./TestimonialBlock.module.css";
 
 const MAX_RATING = 5;
@@ -22,29 +17,16 @@ function normaliseRating(value: number | undefined): number | undefined {
 }
 
 export default function TestimonialBlock({ data }: BlockComponentProps) {
-  // pickHtml returns sanitised markup only; it is the single value ever
-  // passed to dangerouslySetInnerHTML in this file.
-  const quoteHtml = pickHtml(
+  // Authored fields on this type: quote, authorName, authorRole, authorImage.
+  // `quote` is plain text in the CMS, so it is rendered as text — no HTML here.
+  const quote = pickString(
     data,
     "quote",
     "quoteText",
-    "text",
-    "body",
     "testimonial",
     "testimonialText",
-    "content",
-    "description",
-  );
-  const quoteText = pickString(
-    data,
-    "quote",
-    "quoteText",
     "text",
     "body",
-    "testimonial",
-    "testimonialText",
-    "content",
-    "description",
   );
 
   const authorName = pickString(
@@ -55,40 +37,46 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
     "personName",
     "customerName",
   );
-  const authorTitle = pickString(
+  const authorRole = pickString(
     data,
-    "authorTitle",
+    "authorRole",
     "role",
     "jobTitle",
+    "authorTitle",
     "title",
     "position",
   );
+
+  // authorImage is a content reference ({ key }) on this type: pickImage returns
+  // undefined unless the instance actually resolves it to a URL, and an <img> is
+  // only emitted when a usable src came back.
+  const avatar = pickImage(
+    data,
+    "authorImage",
+    "avatar",
+    "image",
+    "photo",
+    "portrait",
+  );
+
+  // Optional extras: not part of this content type today, kept only so an
+  // instance that does author them still renders. Absent => nothing rendered.
   const company = pickString(
     data,
     "company",
     "companyName",
     "organization",
     "organisation",
-    "customer",
-  );
-  const avatar = pickImage(
-    data,
-    "avatar",
-    "authorImage",
-    "image",
-    "photo",
-    "portrait",
-    "picture",
   );
   const rating = normaliseRating(
     pickNumber(data, "rating", "stars", "score", "starRating"),
   );
 
-  const hasQuote = Boolean(quoteHtml) || Boolean(quoteText);
-  if (!hasQuote && !authorName && !company) return null;
+  if (!quote && !authorName && !company) return null;
 
-  const attribution = [authorTitle, company].filter(Boolean).join(", ");
-  const hasAttribution = Boolean(authorName) || Boolean(attribution) || Boolean(avatar);
+  const attribution = [authorRole, company].filter(Boolean).join(", ");
+  const hasAttribution =
+    Boolean(authorName) || Boolean(attribution) || Boolean(avatar);
 
   return (
     <section className={styles.block}>
@@ -111,13 +99,9 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
           </p>
         ) : null}
 
-        {hasQuote ? (
+        {quote ? (
           <blockquote className={styles.quote}>
-            {quoteHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: quoteHtml }} />
-            ) : (
-              <p>{quoteText}</p>
-            )}
+            <p>{quote}</p>
           </blockquote>
         ) : null}
 
@@ -127,7 +111,7 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
               <img
                 className={styles.avatar}
                 src={avatar.src}
-                alt={avatar.alt ?? (authorName ? `${authorName}` : "")}
+                alt={avatar.alt ?? ""}
                 loading="lazy"
                 decoding="async"
                 width={56}

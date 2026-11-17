@@ -132,7 +132,7 @@ export default async function PreviewPage({
           ctx={{ isEditMode: ctx === "edit", locale: loc }}
         />
       </main>
-      {cmsHost ? <PreviewBridge cmsHost={cmsHost} nonce={nonce} /> : null}
+      {cmsHost ? <PreviewBridge cmsHost={cmsHost} nonce={nonce} version={ver} /> : null}
     </>
   );
 }

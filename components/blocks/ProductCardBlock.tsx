@@ -1,71 +1,43 @@
 import type { BlockComponentProps } from "@/components/registry";
-import {
-  pickHtml,
-  pickImage,
-  pickLink,
-  pickNumber,
-  pickString,
-} from "@/lib/fields";
+import { pickLink, pickString } from "@/lib/fields";
 import styles from "./ProductCardBlock.module.css";
 
 function isExternal(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
-export default function ProductCardBlock({ data, nodeKey }: BlockComponentProps) {
-  const title = pickString(
-    data,
-    "name",
-    "productName",
-    "title",
-    "heading",
-    "headline",
-    "displayName",
-  );
-  const description = pickHtml(
-    data,
-    "description",
-    "productDescription",
-    "summary",
-    "body",
-    "text",
-    "intro",
-  );
-  const priceText = pickString(data, "price", "priceText", "productPrice", "cost", "amount");
-  const priceNumber =
-    priceText === undefined
-      ? pickNumber(data, "price", "priceValue", "productPrice", "cost", "amount")
-      : undefined;
-  const price = priceText ?? (priceNumber !== undefined ? String(priceNumber) : undefined);
-  const badge = pickString(data, "badge", "label", "tag", "eyebrow", "category");
-  const image = pickImage(data, "image", "productImage", "media", "photo", "thumbnail");
-  // The alt text is often authored as a sibling field rather than on the image node.
-  const imageAlt = pickString(data, "imageAlt", "altText", "alt", "imageAlternateText");
-  const link = pickLink(data, "cta", "callToAction", "link", "url", "productLink", "href");
+/** The CMS stores `icon` as a short keyword ("business"). Render an initial as the emblem. */
+function emblem(keyword: string): string {
+  const first = Array.from(keyword.trim())[0];
+  return first ? first.toUpperCase() : "";
+}
 
-  if (!title && !description && !price && !image && !link) {
+export default function ProductCardBlock({ data, nodeKey }: BlockComponentProps) {
+  const title = pickString(data, "title", "name", "heading", "displayName");
+  // Authored as a plain sentence in this instance — rendered as text, not HTML.
+  const description = pickString(data, "description", "summary", "text", "intro");
+  const icon = pickString(data, "icon", "iconName", "iconKey");
+  const linkText = pickString(data, "linkText", "linkLabel", "ctaText");
+  const link = pickLink(data, "linkUrl", "link", "url", "cta");
+  const label = linkText ?? link?.label;
+
+  if (!title && !description && !link) {
     return null;
   }
 
   const titleId = `product-card-title-${nodeKey}`;
   const external = link ? isExternal(link.href) : false;
+  const iconGlyph = icon ? emblem(icon) : "";
 
   return (
     <article className={styles.card} aria-labelledby={title ? titleId : undefined}>
-      {image ? (
-        <div className={styles.media}>
-          <img
-            className={styles.image}
-            src={image.src}
-            alt={image.alt ?? imageAlt ?? ""}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-      ) : null}
-
       <div className={styles.body}>
-        {badge ? <span className={styles.badge}>{badge}</span> : null}
+        {icon && iconGlyph ? (
+          <span className={styles.icon}>
+            <span aria-hidden="true">{iconGlyph}</span>
+            <span className={styles.srOnly}>{icon}</span>
+          </span>
+        ) : null}
 
         {title ? (
           <h3 className={styles.title} id={titleId}>
@@ -73,19 +45,7 @@ export default function ProductCardBlock({ data, nodeKey }: BlockComponentProps)
           </h3>
         ) : null}
 
-        {price ? (
-          <p className={styles.price}>
-            <span className={styles.srOnly}>Price: </span>
-            {price}
-          </p>
-        ) : null}
-
-        {description ? (
-          <div
-            className={styles.description}
-            dangerouslySetInnerHTML={{ __html: description }}
-          />
-        ) : null}
+        {description ? <p className={styles.description}>{description}</p> : null}
 
         {link ? (
           <a
@@ -93,8 +53,8 @@ export default function ProductCardBlock({ data, nodeKey }: BlockComponentProps)
             href={link.href}
             {...(external ? { rel: "noopener noreferrer" } : {})}
           >
-            {link.label ?? "View product"}
-            {title ? <span className={styles.srOnly}> — {title}</span> : null}
+            {label ?? "Learn more"}
+            {title && !label ? <span className={styles.srOnly}> — {title}</span> : null}
           </a>
         ) : null}
       </div>

@@ -44,34 +44,15 @@
   color: var(--ob-fg);
 }
 
-.quote > div > :first-child,
-.quote > p:first-child {
-  margin-top: 0;
-}
-
-.quote > div > :last-child,
-.quote > p:last-child {
-  margin-bottom: 0;
-}
-
 .quote p {
-  margin: 0 0 var(--ob-space-2);
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
-.quote a {
-  color: var(--ob-accent);
-}
-
-.quote a:focus-visible,
 .block a:focus-visible {
   outline: 2px solid var(--ob-accent);
   outline-offset: 2px;
   border-radius: calc(var(--ob-radius) / 2);
-}
-
-.quote img {
-  max-width: 100%;
-  height: auto;
 }
 
 .caption {

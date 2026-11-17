@@ -6,7 +6,7 @@ import type { BlockComponentProps } from "@/components/registry";
 import { pickHtml, pickList, pickString } from "@/lib/fields";
 import type { BlockData } from "@/lib/types";
 
-import FaqItem from "./FaqItem";
+import FaqItemBlock from "./FaqItemBlock";
 import styles from "./FaqContainerBlock.module.css";
 
 const QUESTION_FIELDS = ["question", "heading", "title", "label", "name", "displayName"] as const;
@@ -15,7 +15,7 @@ const ANSWER_FIELDS = ["answer", "body", "text", "content", "description", "answ
 /**
  * Collapses markup and entities down to plain text. Used ONLY for the JSON-LD
  * payload and for the accordion button label, never for rendering markup:
- * the visible answer goes through FaqItem, which sanitises via pickHtml.
+ * the visible answer goes through FaqItemBlock, which sanitises via pickHtml.
  */
 function toPlainText(value: string | undefined): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -53,7 +53,7 @@ type Entry = {
 
 /**
  * Accordion container. State (which indices are open) lives here; each answer
- * body is rendered by the FaqItem component so a single FAQ entry looks the
+ * body is rendered by the FaqItemBlock component so a single FAQ entry looks the
  * same whether it is nested here or placed on its own in the composition.
  */
 export default function FaqContainerBlock({ data, nodeKey, ctx }: BlockComponentProps) {
@@ -151,10 +151,10 @@ export default function FaqContainerBlock({ data, nodeKey, ctx }: BlockComponent
               const isOpen = openIndices.has(index);
               return (
                 <li className={styles.item} key={entry.key}>
-                  {/* FaqItem owns the trigger, the panel and all the ARIA wiring;
+                  {/* FaqItemBlock owns the trigger, the panel and all the ARIA wiring;
                       the container only owns which indices are open. Re-adding a
                       button or panel here would double every question. */}
-                  <FaqItem
+                  <FaqItemBlock
                     data={entry.data}
                     nodeKey={entry.key}
                     ctx={ctx}

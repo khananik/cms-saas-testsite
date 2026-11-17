@@ -5,9 +5,9 @@ import { useCallback, useId, useState } from "react";
 import type { BlockComponentProps } from "@/components/registry";
 import { pickHtml, pickString } from "@/lib/fields";
 
-import styles from "./FaqItem.module.css";
+import styles from "./FaqItemBlock.module.css";
 
-export type FaqItemProps = BlockComponentProps & {
+export type FaqItemBlockProps = BlockComponentProps & {
   /** Controlled open state. When omitted the item manages its own state. */
   open?: boolean;
   /** Supplied by FaqContainerBlock when it owns the open state. */
@@ -22,13 +22,13 @@ function toIdPart(value: string): string {
   return cleaned.length > 0 ? cleaned : "item";
 }
 
-export default function FaqItem({
+export default function FaqItemBlock({
   data,
   nodeKey,
   open,
   onToggle,
   headingLevel = 3,
-}: FaqItemProps) {
+}: FaqItemBlockProps) {
   const [selfOpen, setSelfOpen] = useState(false);
   const reactId = useId();
 

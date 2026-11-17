@@ -1,5 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
-import { pickHtml, pickImage, pickLink, pickString } from "@/lib/fields";
+import { pickImage, pickLink, pickString } from "@/lib/fields";
 
 import styles from "./HeroBlock.module.css";
 
@@ -10,24 +10,29 @@ function isExternal(href: string): boolean {
 
 /**
  * Full-width hero: large type over an optional background image with a
- * readable overlay, plus up to two calls to action. Stacks to one column
+ * readable overlay, plus a single call to action. Stacks to one column
  * under 720px and stays gutter-safe at 360px.
+ *
+ * Field names below match the authored CMS schema (headline, subheadline,
+ * ctaText, ctaLink, backgroundImage); the later names in each list are
+ * tolerated spellings from other instances of the type.
  */
 export default function HeroBlock({ data }: BlockComponentProps) {
-  const eyebrow = pickString(data, "eyebrow", "kicker", "label", "overline");
-  const heading = pickString(data, "heading", "title", "headline", "name");
-  const subheading = pickString(data, "subheading", "subtitle", "preamble", "intro", "lead");
-  const body = pickHtml(data, "body", "text", "description", "content", "mainBody", "richText");
-  const image = pickImage(data, "image", "backgroundImage", "heroImage", "media", "banner");
-  const primary = pickLink(data, "cta", "primaryCta", "link", "callToAction", "primaryLink");
-  const secondary = pickLink(data, "secondaryCta", "secondaryLink", "cta2", "altCta");
+  const heading = pickString(data, "headline", "heading", "title", "name");
+  const subheading = pickString(data, "subheadline", "subheading", "subtitle", "preamble", "intro");
 
-  const hasText = Boolean(eyebrow || heading || subheading || body);
-  const hasCta = Boolean(primary || secondary);
-  if (!hasText && !hasCta) return null;
+  // backgroundImage is authored as a content reference ({ key }), which carries no
+  // URL. pickImage returns undefined for that shape, and the allowlist in lib/url.ts
+  // drops anything that is not a safe relative path or http(s) URL, so the hero
+  // simply renders without a background rather than emitting a broken <img>.
+  const image = pickImage(data, "backgroundImage", "image", "heroImage", "media", "banner");
 
-  const primaryLabel = primary?.label ?? "Learn more";
-  const secondaryLabel = secondary?.label ?? "Read more";
+  // pickLink runs the href through the same allowlist; never render an <a> without it.
+  const cta = pickLink(data, "ctaLink", "cta", "primaryCta", "link", "callToAction");
+  const ctaLabel = pickString(data, "ctaText", "ctaLabel", "linkText") ?? cta?.label ?? "Learn more";
+
+  const hasText = Boolean(heading || subheading);
+  if (!hasText && !cta) return null;
 
   return (
     <section className={styles.hero} data-has-image={image ? "true" : "false"}>
@@ -45,33 +50,18 @@ export default function HeroBlock({ data }: BlockComponentProps) {
       ) : null}
 
       <div className={styles.inner}>
-        {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
         {heading ? <h1 className={styles.heading}>{heading}</h1> : null}
         {subheading ? <p className={styles.subheading}>{subheading}</p> : null}
-        {body ? (
-          <div className={styles.body} dangerouslySetInnerHTML={{ __html: body }} />
-        ) : null}
 
-        {hasCta ? (
+        {cta ? (
           <div className={styles.actions}>
-            {primary ? (
-              <a
-                className={`${styles.cta} ${styles.ctaPrimary}`}
-                href={primary.href}
-                rel={isExternal(primary.href) ? "noopener noreferrer" : undefined}
-              >
-                {primaryLabel}
-              </a>
-            ) : null}
-            {secondary ? (
-              <a
-                className={`${styles.cta} ${styles.ctaSecondary}`}
-                href={secondary.href}
-                rel={isExternal(secondary.href) ? "noopener noreferrer" : undefined}
-              >
-                {secondaryLabel}
-              </a>
-            ) : null}
+            <a
+              className={`${styles.cta} ${styles.ctaPrimary}`}
+              href={cta.href}
+              rel={isExternal(cta.href) ? "noopener noreferrer" : undefined}
+            >
+              {ctaLabel}
+            </a>
           </div>
         ) : null}
       </div>

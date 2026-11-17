@@ -45,15 +45,6 @@
   max-width: var(--ob-maxw);
 }
 
-.eyebrow {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ob-accent);
-}
-
 .heading {
   margin: 0;
   font-size: clamp(2rem, 6vw, 3.5rem);
@@ -70,31 +61,6 @@
   line-height: 1.5;
   color: var(--ob-muted);
   max-width: 56ch;
-}
-
-.body {
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--ob-fg);
-  max-width: 64ch;
-}
-
-.body > :first-child {
-  margin-top: 0;
-}
-
-.body > :last-child {
-  margin-bottom: 0;
-}
-
-.body a {
-  color: var(--ob-accent);
-}
-
-.body img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--ob-radius);
 }
 
 .actions {
@@ -122,12 +88,6 @@
   background: var(--ob-accent);
   color: var(--ob-accent-fg);
   box-shadow: var(--ob-shadow);
-}
-
-.ctaSecondary {
-  background: transparent;
-  color: var(--ob-fg);
-  border-color: var(--ob-border);
 }
 
 .cta:hover {

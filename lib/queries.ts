@@ -1,7 +1,6 @@
 import "server-only";
 
 import { graphQuery } from "@/lib/graph";
-import { BLOCK_FRAGMENTS } from "@/lib/fragments";
 import type { ExperiencePage } from "@/lib/types";
 
 /**
@@ -50,7 +49,13 @@ const COMPONENT_SELECTION = `
         types
         url { default hierarchical }
       }
-      ${BLOCK_FRAGMENTS}
+      # _json returns every authored field of the block, including nested item
+      # arrays such as FaqContainerBlock.faqItems and CustomerVoicesBlock.cards.
+      # It replaces per-type inline fragments on purpose: a fragment naming one
+      # field that does not exist fails the WHOLE query, and the field names vary
+      # per instance. With _json, adding a block type to the CMS needs no query
+      # change at all. normaliseComponent() below flattens it onto the block.
+      _json
     }
   }
 `;
@@ -179,6 +184,53 @@ export const PREVIEW_BY_KEY_VERSION_QUERY = `
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------------- */
+/* _json normalisation                                                        */
+/* -------------------------------------------------------------------------- */
+
+/** Depth cap mirrors the renderer's: malformed data must not blow the stack. */
+const MAX_NORMALISE_DEPTH = 12;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Flattens `component._json` onto the component itself, so blocks read
+ * `data.headline` rather than `data._json.headline`. `_metadata` from the
+ * typed selection wins over the copy inside `_json`, because the typed one is
+ * what the renderer and the registry match on.
+ */
+function normaliseComponent(component: unknown): unknown {
+  if (!isRecord(component)) return component;
+  const json = component._json;
+  if (!isRecord(json)) return component;
+
+  const rest = { ...component };
+  delete rest._json;
+  return { ...json, ...rest };
+}
+
+/** Walks a composition tree and normalises every component node in place. */
+function normaliseComposition(node: unknown, depth = 0): void {
+  if (!isRecord(node) || depth > MAX_NORMALISE_DEPTH) return;
+
+  if ("component" in node) {
+    node.component = normaliseComponent(node.component);
+  }
+
+  const children = node.nodes;
+  if (Array.isArray(children)) {
+    for (const child of children) normaliseComposition(child, depth + 1);
+  }
+}
+
+/** Returns the page with its composition normalised. Null passes through. */
+function normalisePage(page: ExperiencePage | null): ExperiencePage | null {
+  if (page) normaliseComposition(page.composition);
+  return page;
+}
+
 type ExperienceResult = {
   _Experience?: { items?: (ExperiencePage | null)[] | null } | null;
 };
@@ -254,7 +306,7 @@ export async function getPageByPath(
   });
 
   const page = firstItem(experience?._Experience?.items);
-  if (page) return page;
+  if (page) return normalisePage(page);
 
   const content = await graphQuery<ContentResult>({
     query: normalisedLocale
@@ -263,7 +315,7 @@ export async function getPageByPath(
     variables,
   });
 
-  return firstItem(content?._Content?.items);
+  return normalisePage(firstItem(content?._Content?.items));
 }
 
 export type PreviewArgs = {
@@ -296,5 +348,5 @@ export async function getPreviewContent(
     previewToken,
   });
 
-  return firstItem(result?._Experience?.items);
+  return normalisePage(firstItem(result?._Experience?.items));
 }

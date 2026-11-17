@@ -26,15 +26,24 @@ function subscribeNever(): () => void {
 
 const GRID_MAX = 3;
 
+const QUOTE_NAMES = ["text", "quote", "body", "testimonial", "statement", "content", "description"] as const;
+
+/** Cheap markup probe: this instance stores the quote as a plain sentence, but other
+ *  instances may author the same field as RichText. Plain text stays plain text. */
+const LOOKS_LIKE_MARKUP = /<[a-z][^>]*>/i;
+
 function toVoice(item: BlockData, index: number): Voice | undefined {
-  // Rich-text first: a RichText field arrives as { html } and pickString would miss it,
-  // so reading the string first would render authored markup as escaped literal text.
-  const quoteHtml = pickHtml(item, "quote", "text", "body", "testimonial", "statement", "content", "description");
-  const quoteText = quoteHtml === undefined
-    ? pickString(item, "quote", "text", "body", "testimonial", "statement", "content", "description")
-    : undefined;
-  const name = pickString(item, "name", "author", "authorName", "customerName", "personName", "displayName");
-  const title = pickString(item, "title", "role", "jobTitle", "position", "authorTitle");
+  // `text` on this instance is a plain sentence, so it is read as a string and
+  // rendered as text. Only a value that actually carries markup goes through
+  // pickHtml (which sanitises) and dangerouslySetInnerHTML.
+  const quoteValue = pickString(item, ...QUOTE_NAMES);
+  const quoteHtml =
+    quoteValue !== undefined && LOOKS_LIKE_MARKUP.test(quoteValue)
+      ? pickHtml(item, ...QUOTE_NAMES)
+      : undefined;
+  const quoteText = quoteHtml === undefined ? quoteValue : undefined;
+  const name = pickString(item, "author", "name", "authorName", "customerName", "personName", "displayName");
+  const title = pickString(item, "role", "title", "jobTitle", "position", "authorTitle");
   const company = pickString(item, "company", "organisation", "organization", "customer", "companyName", "brand");
   const image = pickImage(item, "image", "photo", "avatar", "portrait", "authorImage", "picture");
 
@@ -55,10 +64,10 @@ function toVoice(item: BlockData, index: number): Voice | undefined {
 
 export default function CustomerVoicesBlock({ data, nodeKey }: BlockComponentProps) {
   const heading = pickString(data, "heading", "title", "headline", "sectionHeading");
-  const intro = pickString(data, "intro", "subheading", "subtitle", "description", "lead");
+  const intro = pickString(data, "subheading", "intro", "subtitle", "description", "lead");
 
   const voices = useMemo<Voice[]>(() => {
-    const items = pickList(data, "voices", "testimonials", "items", "quotes");
+    const items = pickList(data, "cards", "voices", "testimonials", "items", "quotes");
     const mapped: Voice[] = [];
     items.forEach((item, index) => {
       const voice = toVoice(item, index);

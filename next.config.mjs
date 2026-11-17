@@ -43,6 +43,11 @@ if (!CMS_ORIGIN) {
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Optimizely Graph stores canonical URLs WITH a trailing slash
+  // (_metadata.url.default is e.g. "/en/business/pricing/"). Without this, Next
+  // redirects every such link to the slash-less form first, costing a 308 on each
+  // internal navigation and splitting the canonical URL for SEO.
+  trailingSlash: true,
   async headers() {
     return [
       {

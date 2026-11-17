@@ -36,25 +36,15 @@ function decimalsOf(numericText: string): number {
   return dot === -1 ? 0 : numericText.length - dot - 1;
 }
 
-/**
- * Parses a CMS-authored value into a number plus any prefix/suffix the author
- * baked into the string (e.g. "$1,200+"). Returns undefined for anything that
- * is not numeric, so the caller can fall back to rendering the raw text.
- */
-function parseValue(raw: string | undefined, num: number | undefined): ParsedValue | undefined {
-  if (typeof num === "number" && Number.isFinite(num)) {
-    return { value: num, decimals: decimalsOf(String(num)) };
-  }
-
-  if (typeof raw !== "string") return undefined;
-
-  const match = /^([^0-9]*?)([+-]?[0-9][0-9,  \s]*(?:\.[0-9]+)?)(.*)$/.exec(raw.trim());
+/** Parses "1,200", "$1.2k", "50" etc. into a number plus any baked-in affixes. */
+function parseNumericText(raw: string): ParsedValue | undefined {
+  const match = /^([^0-9]*?)([+-]?[0-9][0-9,  \s]*(?:\.[0-9]+)?)(.*)$/.exec(raw.trim());
   if (!match) return undefined;
 
   const [, rawPrefix, rawNumber, rawSuffix] = match;
   if (rawNumber === undefined) return undefined;
 
-  const cleaned = rawNumber.replace(/[,  \s]/g, "");
+  const cleaned = rawNumber.replace(/[,  \s]/g, "");
   if (!/^[+-]?[0-9]+(\.[0-9]+)?$/.test(cleaned)) return undefined;
 
   const value = Number(cleaned);
@@ -69,6 +59,20 @@ function parseValue(raw: string | undefined, num: number | undefined): ParsedVal
     prefix: prefix.length > 0 ? prefix : undefined,
     suffix: suffix.length > 0 ? suffix : undefined,
   };
+}
+
+/**
+ * The authored `value` is a string ("50") in this instance, so the string is the
+ * source of truth and is parsed FIRST. pickNumber is only consulted when there is
+ * no string at all: it strips non-numeric characters, so a purely textual value
+ * such as "Many" would come back as 0 rather than undefined.
+ */
+function parseValue(raw: string | undefined, num: number | undefined): ParsedValue | undefined {
+  if (typeof raw === "string") return parseNumericText(raw);
+  if (typeof num === "number" && Number.isFinite(num)) {
+    return { value: num, decimals: decimalsOf(String(num)) };
+  }
+  return undefined;
 }
 
 function formatNumber(value: number, decimals: number, locale: string | undefined): string {
@@ -86,10 +90,18 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function toStat(item: BlockData, index: number, nodeKey: string): Stat | undefined {
+/**
+ * Builds one stat. `scope` is "self" when `item` is the block itself — the real
+ * shape in this instance — in which case the label candidates stay narrow so a
+ * sibling heading/intro field can never be mistaken for the stat label.
+ */
+function toStat(item: BlockData, index: number, nodeKey: string, scope: "self" | "item"): Stat | undefined {
   const rawValue = pickString(item, "value", "number", "stat", "statistic", "count", "amount", "figure");
   const numericValue = pickNumber(item, "value", "number", "stat", "statistic", "count", "amount", "figure");
-  const label = pickString(item, "label", "caption", "title", "heading", "name", "text", "description");
+  const label =
+    scope === "self"
+      ? pickString(item, "label", "statLabel", "caption", "name")
+      : pickString(item, "label", "caption", "title", "heading", "name", "text", "description");
   const parsed = parseValue(rawValue, numericValue);
 
   if (!parsed && !rawValue && !label) return undefined;
@@ -113,10 +125,16 @@ export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponent
   const intro = pickString(data, "intro", "subheading", "description", "summary", "text");
 
   const stats = useMemo<Stat[]>(() => {
+    // Primary path: this type is ONE stat (value / suffix / label). The list path
+    // below is kept only as a tolerant fallback for instances that group stats.
     const items = pickList(data, "stats", "items", "counters", "statistics", "facts");
-    return items
-      .map((item, index) => toStat(item, index, nodeKey))
+    const fromList = items
+      .map((item, index) => toStat(item, index, nodeKey, "item"))
       .filter((stat): stat is Stat => stat !== undefined);
+    if (fromList.length > 0) return fromList;
+
+    const single = toStat(data, 0, nodeKey, "self");
+    return single ? [single] : [];
   }, [data, nodeKey]);
 
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -179,11 +197,14 @@ export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponent
 
   const headingId = `${nodeKey}-stats-heading`;
   const locale = ctx.locale;
+  // Solo = the real shape: a bare stat the CMS drops into a row beside siblings,
+  // so it carries no section padding and flexes to share the row.
+  const solo = !heading && !intro && stats.length === 1;
 
   return (
     <section
       ref={sectionRef}
-      className={styles.block}
+      className={solo ? `${styles.block} ${styles.solo}` : styles.block}
       aria-labelledby={heading ? headingId : undefined}
     >
       <div className={styles.inner}>

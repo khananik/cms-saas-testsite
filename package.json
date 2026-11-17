@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "graph:introspect": "node scripts/introspect-graph.mjs"
+    "graph:types": "node scripts/graph-types.mjs"
   },
   "dependencies": {
     "next": "16.4.6",

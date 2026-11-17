@@ -10,7 +10,7 @@ import LogoGridBlock from "./blocks/LogoGridBlock";
 import StatsCounterBlock from "./blocks/StatsCounterBlock";
 import FeaturedContentBlock from "./blocks/FeaturedContentBlock";
 import FaqContainerBlock from "./blocks/FaqContainerBlock";
-import FaqItem from "./blocks/FaqItem";
+import FaqItemBlock from "./blocks/FaqItemBlock";
 import CallToAction from "./blocks/CallToAction";
 import RawHtmlBlock from "./blocks/RawHtmlBlock";
 
@@ -45,7 +45,7 @@ export const blockRegistry: Record<string, BlockComponent> = register({
   StatsCounterBlock,
   FeaturedContentBlock,
   FaqContainerBlock,
-  FaqItem,
+  FaqItemBlock,
   CallToAction,
   RawHtmlBlock,
 });

@@ -21,22 +21,26 @@ function isExternal(href: string): boolean {
 }
 
 /**
- * Banner call to action: heading, optional rich-text body and up to two links,
- * on one of three surfaces. Content is centred, the buttons wrap on narrow
- * screens and every tap target clears 44px.
+ * Call to action: a single prominent button built from the authored `label` and
+ * `link`. Heading and body are optional extras that only render when an instance
+ * happens to carry them. Content is centred and the button clears 44px.
  */
 export default function CallToAction({ data }: BlockComponentProps) {
+  // `label` and `link` are the real authored fields on this type; the rest are
+  // tolerated fallbacks for instances that name things differently.
+  const label = pickString(data, "label", "linkText", "ctaLabel", "buttonText", "linkLabel");
+  const link = pickLink(data, "link", "cta", "callToAction", "url", "buttonLink", "primaryCta");
+
+  // Optional extras — absent from every sample seen on this instance.
   const heading = pickString(data, "heading", "title", "headline", "name");
   // pickHtml returns sanitised markup — the only value allowed near dangerouslySetInnerHTML.
   const body = pickHtml(data, "body", "text", "description", "content", "mainBody", "richText");
-  const primary = pickLink(data, "primaryCta", "cta", "link", "callToAction", "primaryLink", "button");
-  const secondary = pickLink(data, "secondaryCta", "secondaryLink", "cta2", "altCta", "secondaryButton");
   const variant = toVariant(pickString(data, "variant", "style"));
 
-  if (!heading && !body && !primary && !secondary) return null;
+  if (!link && !heading && !body) return null;
 
-  const primaryLabel = primary?.label ?? "Get started";
-  const secondaryLabel = secondary?.label ?? "Learn more";
+  // Prefer the authored label, then any label pickLink found inside the link node.
+  const buttonLabel = label ?? link?.label ?? "Learn more";
 
   return (
     <section className={styles.cta} data-variant={variant}>
@@ -44,26 +48,16 @@ export default function CallToAction({ data }: BlockComponentProps) {
         {heading ? <h2 className={styles.heading}>{heading}</h2> : null}
         {body ? <div className={styles.body} dangerouslySetInnerHTML={{ __html: body }} /> : null}
 
-        {primary || secondary ? (
+        {/* Never render an <a> without an href: pickLink returns undefined for an unsafe or missing URL. */}
+        {link ? (
           <div className={styles.actions}>
-            {primary ? (
-              <a
-                className={`${styles.button} ${styles.buttonPrimary}`}
-                href={primary.href}
-                rel={isExternal(primary.href) ? "noopener noreferrer" : undefined}
-              >
-                {primaryLabel}
-              </a>
-            ) : null}
-            {secondary ? (
-              <a
-                className={`${styles.button} ${styles.buttonSecondary}`}
-                href={secondary.href}
-                rel={isExternal(secondary.href) ? "noopener noreferrer" : undefined}
-              >
-                {secondaryLabel}
-              </a>
-            ) : null}
+            <a
+              className={styles.button}
+              href={link.href}
+              rel={isExternal(link.href) ? "noopener noreferrer" : undefined}
+            >
+              {buttonLabel}
+            </a>
           </div>
         ) : null}
       </div>

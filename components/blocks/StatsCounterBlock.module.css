@@ -4,9 +4,25 @@
   padding: var(--ob-space-6) var(--ob-space-3);
 }
 
+/*
+ * Solo is the real shape in this instance: a single stat that the CMS places in a
+ * row beside sibling StatsCounterBlocks. It drops the section chrome and flexes so
+ * a row of them shares the width evenly, wrapping instead of overflowing at 360px.
+ */
+.block.solo {
+  padding: 0;
+  background: transparent;
+  flex: 1 1 11rem;
+  min-width: 0;
+}
+
 .inner {
   max-width: var(--ob-maxw);
   margin: 0 auto;
+}
+
+.solo .inner {
+  max-width: none;
 }
 
 .heading {
@@ -31,6 +47,11 @@
   padding: 0;
 }
 
+.solo .grid {
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+
 .item {
   display: flex;
   flex-direction: column-reverse;
@@ -41,14 +62,16 @@
   box-shadow: var(--ob-shadow);
   padding: var(--ob-space-4) var(--ob-space-3);
   min-width: 0;
+  height: 100%;
 }
 
 .value {
   margin: 0;
-  font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  font-family: var(--ob-font);
+  font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
   color: var(--ob-accent);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
@@ -59,9 +82,10 @@
 }
 
 .affix {
-  font-size: 0.65em;
+  font-size: 0.6em;
   font-weight: 600;
   color: var(--ob-fg);
+  margin-inline-start: 0.04em;
 }
 
 .label {
@@ -69,6 +93,7 @@
   color: var(--ob-muted);
   font-size: 0.9375rem;
   line-height: 1.4;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 

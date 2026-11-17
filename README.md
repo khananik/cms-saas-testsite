@@ -26,7 +26,6 @@ pinned exactly.
 | `lib/types.ts` | Shared TypeScript types for Graph content and composition nodes, plus node type guards. |
 | `lib/graph.ts` | The Graph query helper: auth headers, caching, timeouts, error handling. Server-only. |
 | `lib/queries.ts` | The GraphQL documents: page-by-URL and page-by-version (preview). |
-| `lib/fragments.ts` | Per-block GraphQL fragments — **regenerate these from the live schema, see setup**. |
 | `lib/fields.ts` | Tolerant field readers (`pickString`, `pickHtml`, `pickImage`, `pickLink`, `pickList`, `pickNumber`). |
 | `lib/url.ts` | `safeHref` / `safeImageSrc` — URL allowlisting. |
 | `lib/sanitize.ts` | `sanitizeHtml` — `sanitize-html` with an explicit tag, attribute and scheme allowlist. |
@@ -39,7 +38,7 @@ pinned exactly.
 | `components/registry.ts` | Maps a Graph content type name to a React component. |
 | `components/layout/` | `BlankSection`, `Row`, `Column` — the structural pieces. |
 | `components/blocks/` | One component (plus CSS Module) per block type. |
-| `scripts/introspect-graph.mjs` | Reads the live Graph schema and rewrites `lib/fragments.ts`. |
+| `scripts/graph-types.mjs` | Discovery tool: which block types the site uses, and a real sample of any one of them. |
 
 ## First-time setup
 
@@ -60,17 +59,25 @@ Then fill in `.env.local`:
 All three are **server-only**. Never prefix any of them with `NEXT_PUBLIC_` — that would inline
 the Graph key into the browser bundle.
 
-### IMPORTANT: regenerate the fragments before you run anything
+### How block fields are fetched
+
+There is no per-block GraphQL fragment to maintain. The page query asks each composition
+component for `_json`, which returns **every authored field** of that block — including nested
+item arrays such as `FaqContainerBlock.faqItems` and `CustomerVoicesBlock.cards`, and media
+references complete with their resolved `url.default`. `lib/queries.ts` flattens `_json` onto
+the block before it reaches your component, so a component reads `data.headline` directly.
+
+This is deliberate. The earlier design named fields per type in inline fragments, and in GraphQL
+**one** field name that does not exist fails the *entire* query — the whole page, not just that
+block. Property names differ per instance, so that design broke on contact with a real CMS.
+With `_json`, adding a block type in the CMS needs no query change here at all.
+
+To see what fields a type actually carries before you write a component:
 
 ```bash
-npm run graph:introspect
+npm run graph:types              # block types in use, how often, and which have components
+npm run graph:types HeroBlock    # a real sample of that type's authored fields
 ```
-
-The field names committed in `lib/fragments.ts` are a **guess**, written before anyone had
-read this instance's schema. Graph property names differ per instance, and a single wrong field
-name makes the **entire** GraphQL query fail — not just that block, the whole page. The script
-introspects the live schema using your `.env.local` values and rewrites `lib/fragments.ts` to
-match. Run it after setup, and again whenever a content type changes in the CMS.
 
 ### Run it
 
@@ -128,8 +135,9 @@ host comes from `OPTIMIZELY_CMS_HOST`, and `PreviewBridge` checks the origin of 
    index `data` directly. Return `null` when there is nothing to show.
 2. **Register it** in `components/registry.ts` under its **Graph content type name** (the name
    as it appears in Graph, e.g. `HeroBlock`). Lookup is case-insensitive.
-3. **Add its fragment** by re-running `npm run graph:introspect`, so the query actually asks
-   Graph for that block's fields.
+3. **Nothing else.** The query already returns every field of every block via `_json`. Use
+   `npm run graph:types <TypeName>` to see the real field names first, and put the real name
+   **first** in each `pick*` candidate list.
 
 > **A block with no registered component simply does not render.** It is skipped silently —
 > no error, no placeholder in production. If an editor says "my block is missing from the page",
@@ -137,7 +145,11 @@ host comes from `OPTIMIZELY_CMS_HOST`, and `PreviewBridge` checks the origin of 
 
 Currently registered: `HeroBlock`, `SectionHeadingBlock`, `ProductCardBlock`, `TestimonialBlock`,
 `CustomerVoicesBlock`, `LogoGridBlock`, `StatsCounterBlock`, `FeaturedContentBlock`,
-`FaqContainerBlock` (with `FaqItem`), `CallToAction`, `RawHtmlBlock`.
+`FaqContainerBlock`, `FaqItemBlock`, `CallToAction`, `RawHtmlBlock`.
+
+Run `npm run graph:types` to see which types this site actually uses and which of them still
+have no component — at the time of writing that includes `TextBlock` and `ImageBlock`, which
+between them account for the largest share of unrendered content.
 
 ## Deploying to Vercel
 
@@ -177,6 +189,10 @@ These are deliberate controls, not incidental. Please keep them in place:
   CMS host are ignored.
 - **URL allowlisting in `lib/url.ts`** — only relative paths and `http`/`https`/`mailto`/`tel`.
   `javascript:` and `data:` links are dropped, not rendered.
+- **The preview bridge reacts to the CMS `optimizely:cms:contentSaved` CustomEvent** (that is
+  what the communication injector dispatches — it does not `postMessage`). A CustomEvent carries
+  no origin, so the version in its payload is pattern-checked before it is put in a URL. The
+  `message` listener is kept as a fallback and is gated on the exact CMS origin.
 - **Preview responses are never cached** (`cache: "no-store"`), so drafts cannot leak into a
   shared cache.
 - **Exact pinned dependency versions** (no `^`, no `~`), so a build cannot silently pull a
