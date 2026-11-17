@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickHtml, pickLink, pickString } from "@/lib/fields";
 
 import styles from "./CallToAction.module.css";
@@ -25,7 +26,7 @@ function isExternal(href: string): boolean {
  * `link`. Heading and body are optional extras that only render when an instance
  * happens to carry them. Content is centred and the button clears 44px.
  */
-export default function CallToAction({ data }: BlockComponentProps) {
+export default function CallToAction({ data, ctx }: BlockComponentProps) {
   // `label` and `link` are the real authored fields on this type; the rest are
   // tolerated fallbacks for instances that name things differently.
   const label = pickString(data, "label", "linkText", "ctaLabel", "buttonText", "linkLabel");
@@ -45,8 +46,18 @@ export default function CallToAction({ data }: BlockComponentProps) {
   return (
     <section className={styles.cta} data-variant={variant}>
       <div className={styles.inner}>
-        {heading ? <h2 className={styles.heading}>{heading}</h2> : null}
-        {body ? <div className={styles.body} dangerouslySetInnerHTML={{ __html: body }} /> : null}
+        {heading ? (
+          <h2 className={styles.heading} {...editable(ctx, data, "heading", "title", "headline", "name")}>
+            {heading}
+          </h2>
+        ) : null}
+        {body ? (
+          <div
+            className={styles.body}
+            {...editable(ctx, data, "body", "text", "description", "content", "mainBody", "richText")}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : null}
 
         {/* Never render an <a> without an href: pickLink returns undefined for an unsafe or missing URL. */}
         {link ? (
@@ -55,6 +66,7 @@ export default function CallToAction({ data }: BlockComponentProps) {
               className={styles.button}
               href={link.href}
               rel={isExternal(link.href) ? "noopener noreferrer" : undefined}
+              {...editable(ctx, data, "label", "linkText", "ctaLabel", "buttonText", "linkLabel")}
             >
               {buttonLabel}
             </a>

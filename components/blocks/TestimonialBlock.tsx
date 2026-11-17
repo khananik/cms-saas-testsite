@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickImage, pickNumber, pickString } from "@/lib/fields";
 import styles from "./TestimonialBlock.module.css";
 
@@ -16,7 +17,7 @@ function normaliseRating(value: number | undefined): number | undefined {
   return rounded > MAX_RATING ? MAX_RATING : rounded;
 }
 
-export default function TestimonialBlock({ data }: BlockComponentProps) {
+export default function TestimonialBlock({ data, ctx }: BlockComponentProps) {
   // Authored fields on this type: quote, authorName, authorRole, authorImage.
   // `quote` is plain text in the CMS, so it is rendered as text — no HTML here.
   const quote = pickString(
@@ -101,7 +102,20 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
 
         {quote ? (
           <blockquote className={styles.quote}>
-            <p>{quote}</p>
+            <p
+              {...editable(
+                ctx,
+                data,
+                "quote",
+                "quoteText",
+                "testimonial",
+                "testimonialText",
+                "text",
+                "body",
+              )}
+            >
+              {quote}
+            </p>
           </blockquote>
         ) : null}
 
@@ -109,6 +123,15 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
           <figcaption className={styles.caption}>
             {avatar ? (
               <img
+                {...editable(
+                  ctx,
+                  data,
+                  "authorImage",
+                  "avatar",
+                  "image",
+                  "photo",
+                  "portrait",
+                )}
                 className={styles.avatar}
                 src={avatar.src}
                 alt={avatar.alt ?? ""}
@@ -120,10 +143,42 @@ export default function TestimonialBlock({ data }: BlockComponentProps) {
             ) : null}
             <span className={styles.captionText}>
               {authorName ? (
-                <span className={styles.authorName}>{authorName}</span>
+                <span
+                  className={styles.authorName}
+                  {...editable(
+                    ctx,
+                    data,
+                    "authorName",
+                    "name",
+                    "author",
+                    "personName",
+                    "customerName",
+                  )}
+                >
+                  {authorName}
+                </span>
               ) : null}
               {attribution ? (
-                <span className={styles.authorMeta}>{attribution}</span>
+                <span
+                  className={styles.authorMeta}
+                  // `attribution` merges authorRole with the optional `company`
+                  // field, so it is only tagged as authorRole when this element
+                  // renders that one field and nothing else.
+                  {...(company
+                    ? {}
+                    : editable(
+                        ctx,
+                        data,
+                        "authorRole",
+                        "role",
+                        "jobTitle",
+                        "authorTitle",
+                        "title",
+                        "position",
+                      ))}
+                >
+                  {attribution}
+                </span>
               ) : null}
             </span>
           </figcaption>

@@ -1,0 +1,254 @@
+.block {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--ob-space-4) var(--ob-space-3);
+  color: var(--ob-fg);
+}
+
+/*
+ * Article typography. The measure is capped at ~68ch for comfortable reading,
+ * but still centred inside the page max-width so wide elements (tables, images)
+ * stay aligned with the rest of the column.
+ */
+.prose {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 68ch;
+  margin: 0 auto;
+  font-family: var(--ob-font);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--ob-fg);
+  /* Long URLs and unbroken strings must not push the page sideways at 360px. */
+  overflow-wrap: anywhere;
+}
+
+/* Vertical rhythm is owned by the block, not by the first/last child. */
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose p {
+  margin: 0 0 var(--ob-space-3);
+}
+
+/*
+ * Headings: tighter leading than body copy, and more space above than below so
+ * each heading visually belongs to the text that follows it.
+ */
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin: var(--ob-space-5) 0 var(--ob-space-2);
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+  color: var(--ob-fg);
+}
+
+/*
+ * Authored rich text occasionally contains an <h1>. The page already owns its
+ * own h1, so this is styled to read as a section heading rather than competing
+ * with it. (Heading order in authored prose is the editor's responsibility.)
+ */
+.prose h1 {
+  margin: var(--ob-space-5) 0 var(--ob-space-3);
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+  color: var(--ob-fg);
+}
+
+.prose h2 {
+  font-size: clamp(1.375rem, 1.15rem + 1vw, 1.75rem);
+}
+
+.prose h3 {
+  font-size: clamp(1.1875rem, 1.075rem + 0.5vw, 1.375rem);
+}
+
+.prose h4 {
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
+}
+
+.prose h5,
+.prose h6 {
+  font-size: 1rem;
+  color: var(--ob-muted);
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--ob-space-3);
+  padding-inline-start: var(--ob-space-4);
+}
+
+.prose li {
+  margin-bottom: var(--ob-space-1);
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: var(--ob-space-1);
+  margin-bottom: 0;
+}
+
+.prose strong,
+.prose b {
+  font-weight: 700;
+  color: var(--ob-fg);
+}
+
+.prose em,
+.prose i {
+  font-style: italic;
+}
+
+.prose a {
+  color: var(--ob-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.prose a:focus-visible,
+.prose :focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
+  border-radius: calc(var(--ob-radius) / 2);
+}
+
+.prose blockquote {
+  margin: var(--ob-space-4) 0;
+  padding: var(--ob-space-3);
+  border-inline-start: 3px solid var(--ob-accent);
+  border-radius: var(--ob-radius);
+  background: var(--ob-surface);
+  color: var(--ob-muted);
+  font-style: italic;
+}
+
+.prose blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.prose hr {
+  margin: var(--ob-space-5) 0;
+  border: 0;
+  border-top: 1px solid var(--ob-border);
+}
+
+.prose code {
+  padding: 0 var(--ob-space-1);
+  border-radius: calc(var(--ob-radius) / 2);
+  background: var(--ob-surface);
+  font-family: var(--ob-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 0.9375em;
+}
+
+.prose pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0 0 var(--ob-space-4);
+  padding: var(--ob-space-3);
+  overflow-x: auto;
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+  background: var(--ob-surface);
+  line-height: 1.6;
+  /* Code is pre-formatted: it scrolls inside its box instead of breaking mid-token. */
+  overflow-wrap: normal;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  white-space: pre;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ob-radius);
+}
+
+.prose figure {
+  margin: var(--ob-space-4) 0;
+}
+
+.prose figure img {
+  display: block;
+  margin-inline: auto;
+}
+
+.prose figcaption {
+  margin-top: var(--ob-space-2);
+  color: var(--ob-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/*
+ * The sanitiser emits bare <table> markup with no wrapper element, so the table
+ * itself becomes its own scroll container: `display: block` + `overflow-x: auto`
+ * keeps a wide table scrolling inside the column instead of widening the page at
+ * 360px. `width: max-content` stops the cells collapsing once display is block.
+ */
+.prose table {
+  display: block;
+  max-width: 100%;
+  width: max-content;
+  margin: 0 0 var(--ob-space-4);
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.prose caption {
+  margin-bottom: var(--ob-space-2);
+  color: var(--ob-muted);
+  font-size: 0.875rem;
+  text-align: start;
+}
+
+.prose th,
+.prose td {
+  padding: var(--ob-space-2);
+  border: 1px solid var(--ob-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.prose th {
+  background: var(--ob-surface);
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .block {
+    padding: var(--ob-space-5) var(--ob-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

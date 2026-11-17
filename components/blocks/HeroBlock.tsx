@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickImage, pickLink, pickString } from "@/lib/fields";
 
 import styles from "./HeroBlock.module.css";
@@ -17,7 +18,7 @@ function isExternal(href: string): boolean {
  * ctaText, ctaLink, backgroundImage); the later names in each list are
  * tolerated spellings from other instances of the type.
  */
-export default function HeroBlock({ data }: BlockComponentProps) {
+export default function HeroBlock({ data, ctx }: BlockComponentProps) {
   const heading = pickString(data, "headline", "heading", "title", "name");
   const subheading = pickString(data, "subheadline", "subheading", "subtitle", "preamble", "intro");
 
@@ -40,6 +41,7 @@ export default function HeroBlock({ data }: BlockComponentProps) {
         <div className={styles.media} aria-hidden="true">
           <img
             className={styles.image}
+            {...editable(ctx, data, "backgroundImage", "image", "heroImage", "media", "banner")}
             src={image.src}
             alt=""
             fetchPriority="high"
@@ -50,13 +52,28 @@ export default function HeroBlock({ data }: BlockComponentProps) {
       ) : null}
 
       <div className={styles.inner}>
-        {heading ? <h1 className={styles.heading}>{heading}</h1> : null}
-        {subheading ? <p className={styles.subheading}>{subheading}</p> : null}
+        {heading ? (
+          <h1
+            className={styles.heading}
+            {...editable(ctx, data, "headline", "heading", "title", "name")}
+          >
+            {heading}
+          </h1>
+        ) : null}
+        {subheading ? (
+          <p
+            className={styles.subheading}
+            {...editable(ctx, data, "subheadline", "subheading", "subtitle", "preamble", "intro")}
+          >
+            {subheading}
+          </p>
+        ) : null}
 
         {cta ? (
           <div className={styles.actions}>
             <a
               className={`${styles.cta} ${styles.ctaPrimary}`}
+              {...editable(ctx, data, "ctaText", "ctaLabel", "linkText")}
               href={cta.href}
               rel={isExternal(cta.href) ? "noopener noreferrer" : undefined}
             >

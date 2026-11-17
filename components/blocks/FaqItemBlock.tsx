@@ -3,6 +3,7 @@
 import { useCallback, useId, useState } from "react";
 
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickHtml, pickString } from "@/lib/fields";
 
 import styles from "./FaqItemBlock.module.css";
@@ -25,6 +26,7 @@ function toIdPart(value: string): string {
 export default function FaqItemBlock({
   data,
   nodeKey,
+  ctx,
   open,
   onToggle,
   headingLevel = 3,
@@ -69,7 +71,12 @@ export default function FaqItemBlock({
           aria-controls={panelId}
           onClick={handleToggle}
         >
-          <span className={styles.question}>{question ?? "Read more"}</span>
+          <span
+            className={styles.question}
+            {...editable(ctx, data, "question", "title", "heading", "headline", "label", "name")}
+          >
+            {question ?? "Read more"}
+          </span>
           <span className={styles.chevron} aria-hidden="true" />
         </button>
       </Heading>
@@ -84,9 +91,14 @@ export default function FaqItemBlock({
           <div className={styles.answer}>
             {answerHtml !== undefined ? (
               // Sanitised server-side by pickHtml -> sanitizeHtml (allowlisted tags/attrs).
-              <div dangerouslySetInnerHTML={{ __html: answerHtml }} />
+              <div
+                {...editable(ctx, data, "answer", "body", "text", "content", "description", "richText")}
+                dangerouslySetInnerHTML={{ __html: answerHtml }}
+              />
             ) : (
-              <p>{answerText}</p>
+              <p {...editable(ctx, data, "answer", "body", "text", "content", "description")}>
+                {answerText}
+              </p>
             )}
           </div>
         </div>

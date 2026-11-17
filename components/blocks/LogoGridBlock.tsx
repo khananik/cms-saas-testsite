@@ -1,5 +1,6 @@
 import type { BlockComponentProps } from "@/components/registry";
 import type { BlockData } from "@/lib/types";
+import { editable } from "@/lib/edit";
 import { pickImage, pickLink, pickList, pickString } from "@/lib/fields";
 import styles from "./LogoGridBlock.module.css";
 
@@ -50,7 +51,7 @@ function toLogoEntry(item: BlockData, index: number): LogoEntry | undefined {
   };
 }
 
-export default function LogoGridBlock({ data, nodeKey }: BlockComponentProps) {
+export default function LogoGridBlock({ data, nodeKey, ctx }: BlockComponentProps) {
   // Authored field names confirmed against a live sample: `heading`, `subheading`.
   const heading = pickString(data, "heading", "title", "headline", "name");
   const subheading = pickString(data, "subheading", "subtitle", "description", "intro");
@@ -77,11 +78,22 @@ export default function LogoGridBlock({ data, nodeKey }: BlockComponentProps) {
         {(heading || subheading) && (
           <div className={logos.length > 0 ? styles.header : styles.headerOnly}>
             {heading && (
-              <h2 id={headingId} className={styles.heading}>
+              <h2
+                id={headingId}
+                className={styles.heading}
+                {...editable(ctx, data, "heading", "title", "headline", "name")}
+              >
                 {heading}
               </h2>
             )}
-            {subheading && <p className={styles.subheading}>{subheading}</p>}
+            {subheading && (
+              <p
+                className={styles.subheading}
+                {...editable(ctx, data, "subheading", "subtitle", "description", "intro")}
+              >
+                {subheading}
+              </p>
+            )}
           </div>
         )}
 

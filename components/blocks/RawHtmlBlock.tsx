@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickHtml, pickString } from "@/lib/fields";
 
 import styles from "./RawHtmlBlock.module.css";
@@ -14,7 +15,7 @@ import styles from "./RawHtmlBlock.module.css";
  * through — CMS editors are not a trusted source of HTML, so unsanitised markup
  * would be stored XSS on every page that renders this block.
  */
-export default function RawHtmlBlock({ data }: BlockComponentProps) {
+export default function RawHtmlBlock({ data, ctx }: BlockComponentProps) {
   const html = pickHtml(
     data,
     "html",
@@ -37,6 +38,19 @@ export default function RawHtmlBlock({ data }: BlockComponentProps) {
     <section className={styles.block} aria-label={label}>
       <div
         className={styles.inner}
+        {...editable(
+          ctx,
+          data,
+          "html",
+          "rawHtml",
+          "htmlContent",
+          "markup",
+          "embedCode",
+          "code",
+          "content",
+          "body",
+          "text",
+        )}
         // Sanitised above by pickHtml -> sanitizeHtml. Never pass unsanitised input here.
         dangerouslySetInnerHTML={{ __html: html }}
       />

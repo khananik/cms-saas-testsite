@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickList, pickNumber, pickString } from "@/lib/fields";
 import type { BlockData } from "@/lib/types";
 
@@ -22,6 +23,8 @@ type Stat = {
   prefix?: string;
   suffix?: string;
   label?: string;
+  /** True when the fields came from the block itself rather than a nested list item. */
+  self: boolean;
 };
 
 type ParsedValue = {
@@ -117,6 +120,7 @@ function toStat(item: BlockData, index: number, nodeKey: string, scope: "self" |
     prefix,
     suffix,
     label,
+    self: scope === "self",
   };
 }
 
@@ -230,12 +234,45 @@ export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponent
 
               return (
                 <div key={stat.id} className={styles.item}>
-                  <dt className={stat.label ? styles.label : styles.srOnly}>{stat.label ?? full}</dt>
+                  <dt
+                    className={stat.label ? styles.label : styles.srOnly}
+                    {...(stat.self && stat.label
+                      ? editable(ctx, data, "label", "statLabel", "caption", "name")
+                      : {})}
+                  >
+                    {stat.label ?? full}
+                  </dt>
                   <dd className={styles.value}>
                     <span aria-hidden="true">
                       {stat.prefix ? <span className={styles.affix}>{stat.prefix}</span> : null}
-                      <span className={styles.number}>{animatedText}</span>
-                      {stat.suffix ? <span className={styles.affix}>{stat.suffix}</span> : null}
+                      <span
+                        className={styles.number}
+                        {...(stat.self
+                          ? editable(
+                              ctx,
+                              data,
+                              "value",
+                              "number",
+                              "stat",
+                              "statistic",
+                              "count",
+                              "amount",
+                              "figure",
+                            )
+                          : {})}
+                      >
+                        {animatedText}
+                      </span>
+                      {stat.suffix ? (
+                        <span
+                          className={styles.affix}
+                          {...(stat.self
+                            ? editable(ctx, data, "suffix", "valueSuffix", "unit", "unitOfMeasure")
+                            : {})}
+                        >
+                          {stat.suffix}
+                        </span>
+                      ) : null}
                     </span>
                     {/* Final value, never animated, for assistive technology. */}
                     <span className={styles.srOnly}>{full}</span>

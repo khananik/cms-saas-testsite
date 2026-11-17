@@ -54,6 +54,32 @@ function firstString(value: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * The property name the instance ACTUALLY uses, out of the candidates — preserving
+ * the original casing. Used for on-page-edit tagging, where the attribute has to
+ * carry the real CMS property name, not whichever candidate we happened to list
+ * first. Returns undefined when none of the candidates is present.
+ */
+export function matchedFieldName(
+  data: BlockData | null | undefined,
+  ...names: string[]
+): string | undefined {
+  if (!isRecord(data)) return undefined;
+  const lookup = new Map<string, string>();
+  for (const key of Object.keys(data)) {
+    const lower = key.toLowerCase();
+    if (!lookup.has(lower)) lookup.set(lower, key);
+  }
+  for (const name of names) {
+    if (typeof name !== "string") continue;
+    const actual = lookup.get(name.toLowerCase());
+    if (actual === undefined) continue;
+    const value = data[actual];
+    if (value !== undefined && value !== null) return actual;
+  }
+  return undefined;
+}
+
 /** Plain text field. Returns undefined when empty or absent. */
 export function pickString(data: BlockData | null | undefined, ...names: string[]): string | undefined {
   return firstString(raw(data, names));

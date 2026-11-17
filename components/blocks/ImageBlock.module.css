@@ -1,0 +1,36 @@
+.block {
+  display: block;
+  max-width: var(--ob-maxw);
+  margin: 0 auto;
+  padding: var(--ob-space-5) var(--ob-space-3);
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  /* Keeps a very tall asset from taking over the page. */
+  max-height: 70vh;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--ob-radius);
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  box-shadow: var(--ob-shadow);
+}
+
+.caption {
+  margin: var(--ob-space-2) 0 0;
+  color: var(--ob-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 860px) {
+  .block {
+    padding: var(--ob-space-6) var(--ob-space-3);
+  }
+}

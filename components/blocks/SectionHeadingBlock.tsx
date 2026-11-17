@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickHtml, pickString } from "@/lib/fields";
 
 import styles from "./SectionHeadingBlock.module.css";
@@ -31,7 +32,7 @@ const alignmentClass: Record<Alignment, string | undefined> = {
  * Pure-presentation section header: eyebrow, heading and rich-text description.
  * No links, no state — renders on the server.
  */
-export default function SectionHeadingBlock({ data }: BlockComponentProps) {
+export default function SectionHeadingBlock({ data, ctx }: BlockComponentProps) {
   const eyebrow = pickString(data, "eyebrow", "kicker", "overline", "label", "preHeading");
   const heading = pickString(data, "heading", "title", "headline", "header", "name");
   const subheadingHtml = pickHtml(
@@ -56,12 +57,25 @@ export default function SectionHeadingBlock({ data }: BlockComponentProps) {
     <section className={`${styles.block} ${alignmentClass[align]}`}>
       <div className={styles.inner}>
         {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
-        {heading ? <h2 className={styles.heading}>{heading}</h2> : null}
+        {heading ? (
+          <h2 className={styles.heading} {...editable(ctx, data, "heading", "title", "headline", "header", "name")}>
+            {heading}
+          </h2>
+        ) : null}
         {subheadingHtml ? (
           // Sanitised by pickHtml -> sanitizeHtml (allowlisted tags/attributes/URI schemes).
-          <div className={styles.subheading} dangerouslySetInnerHTML={{ __html: subheadingHtml }} />
+          <div
+            className={styles.subheading}
+            {...editable(ctx, data, "subheading", "subHeading", "description", "body", "text", "intro", "summary")}
+            dangerouslySetInnerHTML={{ __html: subheadingHtml }}
+          />
         ) : subheadingText ? (
-          <p className={styles.subheading}>{subheadingText}</p>
+          <p
+            className={styles.subheading}
+            {...editable(ctx, data, "subheading", "subHeading", "description", "body", "text", "intro", "summary")}
+          >
+            {subheadingText}
+          </p>
         ) : null}
       </div>
     </section>

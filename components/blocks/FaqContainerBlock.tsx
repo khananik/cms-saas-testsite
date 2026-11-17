@@ -3,6 +3,7 @@
 import { useCallback, useId, useMemo, useState } from "react";
 
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import { pickHtml, pickList, pickString } from "@/lib/fields";
 import type { BlockData } from "@/lib/types";
 
@@ -133,7 +134,11 @@ export default function FaqContainerBlock({ data, nodeKey, ctx }: BlockComponent
     <section className={styles.block} aria-labelledby={heading ? headingId : undefined}>
       <div className={styles.inner}>
         {heading ? (
-          <h2 className={styles.heading} id={headingId}>
+          <h2
+            className={styles.heading}
+            id={headingId}
+            {...editable(ctx, data, "heading", "title", "headline", "header", "name")}
+          >
             {heading}
           </h2>
         ) : null}
@@ -141,6 +146,7 @@ export default function FaqContainerBlock({ data, nodeKey, ctx }: BlockComponent
         {descriptionHtml ? (
           <div
             className={styles.description}
+            {...editable(ctx, data, "description", "intro", "body", "text", "summary", "subheading")}
             dangerouslySetInnerHTML={{ __html: descriptionHtml }}
           />
         ) : null}

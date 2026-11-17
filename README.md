@@ -28,6 +28,7 @@ pinned exactly.
 | `lib/queries.ts` | The GraphQL documents: page-by-URL and page-by-version (preview). |
 | `lib/fields.ts` | Tolerant field readers (`pickString`, `pickHtml`, `pickImage`, `pickLink`, `pickList`, `pickNumber`). |
 | `lib/url.ts` | `safeHref` / `safeImageSrc` — URL allowlisting. |
+| `lib/edit.ts` | `editable()` — emits `data-epi-edit` so editors can edit one field in place. |
 | `lib/sanitize.ts` | `sanitizeHtml` — `sanitize-html` with an explicit tag, attribute and scheme allowlist. |
 | `app/layout.tsx` | Root layout, fonts, global CSS. |
 | `app/[[...slug]]/page.tsx` | Published pages, looked up by URL path. |
@@ -145,11 +146,39 @@ host comes from `OPTIMIZELY_CMS_HOST`, and `PreviewBridge` checks the origin of 
 
 Currently registered: `HeroBlock`, `SectionHeadingBlock`, `ProductCardBlock`, `TestimonialBlock`,
 `CustomerVoicesBlock`, `LogoGridBlock`, `StatsCounterBlock`, `FeaturedContentBlock`,
-`FaqContainerBlock`, `FaqItemBlock`, `CallToAction`, `RawHtmlBlock`.
+`FaqContainerBlock`, `FaqItemBlock`, `CallToAction`, `RawHtmlBlock`, `TextBlock`, `ImageBlock`.
 
-Run `npm run graph:types` to see which types this site actually uses and which of them still
-have no component — at the time of writing that includes `TextBlock` and `ImageBlock`, which
-between them account for the largest share of unrendered content.
+Run `npm run graph:types` to see which types this site uses and which still have no component.
+
+## On-page editing in the CMS preview
+
+Two attributes drive the CMS edit view, and both appear **only** in edit context
+(`/preview?...&ctx=edit`). Published pages never carry them.
+
+- `data-epi-block-id` on each component wrapper, added by `ExperienceRenderer`. It lets the
+  editor map a rendered element back to its composition node, so a block can be selected.
+- `data-epi-edit="<propertyName>"` on the element that renders a single field, added by
+  `editable()` from `lib/edit.ts`. It lets an editor click a headline and type, instead of
+  selecting the whole block and using the side panel.
+
+When you tag a field, pass `editable()` the **same candidate names, in the same order**, as that
+field's `pick*` call:
+
+```tsx
+const heading = pickString(data, "headline", "heading", "title");
+// ...
+<h1 {...editable(ctx, data, "headline", "heading", "title")}>{heading}</h1>
+```
+
+The attribute has to carry the property name *this instance* uses, and components deliberately
+accept several candidates, so `editable()` resolves the one actually present rather than assuming
+the first. If the two lists drift apart, the editor tags the wrong property — that is the one
+mistake to watch for when adding fields.
+
+Do **not** tag values that come from a nested item array (`FaqContainerBlock.faqItems`,
+`CustomerVoicesBlock.cards`, logo items). Those belong to a different content item, so the
+attribute would name a property the block does not own. `FaqItemBlock` is the exception: it is a
+registered content type in its own right, so tagging its own fields is correct.
 
 ## Deploying to Vercel
 

@@ -13,6 +13,8 @@ import FaqContainerBlock from "./blocks/FaqContainerBlock";
 import FaqItemBlock from "./blocks/FaqItemBlock";
 import CallToAction from "./blocks/CallToAction";
 import RawHtmlBlock from "./blocks/RawHtmlBlock";
+import TextBlock from "./blocks/TextBlock";
+import ImageBlock from "./blocks/ImageBlock";
 
 export type BlockComponentProps = {
   data: BlockData;
@@ -48,6 +50,8 @@ export const blockRegistry: Record<string, BlockComponent> = register({
   FaqItemBlock,
   CallToAction,
   RawHtmlBlock,
+  TextBlock,
+  ImageBlock,
 });
 
 /**

@@ -6,6 +6,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { BlockComponentProps } from "@/components/registry";
 import type { BlockData } from "@/lib/types";
 import { pickHtml, pickImage, pickList, pickString } from "@/lib/fields";
+import { editable } from "@/lib/edit";
 
 import styles from "./CustomerVoicesBlock.module.css";
 
@@ -62,7 +63,7 @@ function toVoice(item: BlockData, index: number): Voice | undefined {
   return { key, quoteText, quoteHtml, name, title, company, image };
 }
 
-export default function CustomerVoicesBlock({ data, nodeKey }: BlockComponentProps) {
+export default function CustomerVoicesBlock({ data, nodeKey, ctx }: BlockComponentProps) {
   const heading = pickString(data, "heading", "title", "headline", "sectionHeading");
   const intro = pickString(data, "subheading", "intro", "subtitle", "description", "lead");
 
@@ -174,11 +175,22 @@ export default function CustomerVoicesBlock({ data, nodeKey }: BlockComponentPro
         {(heading !== undefined || intro !== undefined) && (
           <header className={styles.header}>
             {heading !== undefined && (
-              <h2 className={styles.heading} id={headingId}>
+              <h2
+                className={styles.heading}
+                id={headingId}
+                {...editable(ctx, data, "heading", "title", "headline", "sectionHeading")}
+              >
                 {heading}
               </h2>
             )}
-            {intro !== undefined && <p className={styles.intro}>{intro}</p>}
+            {intro !== undefined && (
+              <p
+                className={styles.intro}
+                {...editable(ctx, data, "subheading", "intro", "subtitle", "description", "lead")}
+              >
+                {intro}
+              </p>
+            )}
           </header>
         )}
 

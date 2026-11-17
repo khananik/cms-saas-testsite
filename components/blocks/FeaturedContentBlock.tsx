@@ -1,4 +1,5 @@
 import type { BlockComponentProps } from "@/components/registry";
+import { editable } from "@/lib/edit";
 import {
   pickHtml,
   pickImage,
@@ -28,6 +29,7 @@ function isExternal(href: string): boolean {
 export default function FeaturedContentBlock({
   data,
   nodeKey,
+  ctx,
 }: BlockComponentProps) {
   // The real field. A ContentReference serialises like the other reference
   // fields on this instance ({ key, url: { default, hierarchical, ... } }),
@@ -89,6 +91,7 @@ export default function FeaturedContentBlock({
             <div className={styles.media}>
               <img
                 className={styles.image}
+                {...editable(ctx, data, "image", "media", "picture", "thumbnail", "photo")}
                 src={image.src}
                 alt={image.alt ?? imageAlt ?? ""}
                 loading="lazy"
@@ -100,21 +103,41 @@ export default function FeaturedContentBlock({
           <div className={styles.text}>
             {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
             {heading ? (
-              <h2 id={headingId} className={styles.heading}>
+              <h2
+                id={headingId}
+                className={styles.heading}
+                {...editable(ctx, data, "heading", "headline", "title", "name")}
+              >
                 {heading}
               </h2>
             ) : null}
             {bodyHtml ? (
               <div
                 className={styles.body}
+                {...editable(ctx, data, "body", "bodyText", "mainBody", "content")}
                 dangerouslySetInnerHTML={{ __html: bodyHtml }}
               />
             ) : bodyText ? (
-              <p className={styles.body}>{bodyText}</p>
+              <p
+                className={styles.body}
+                {...editable(
+                  ctx,
+                  data,
+                  "subheading",
+                  "subheadline",
+                  "description",
+                  "summary",
+                  "teaser",
+                  "text",
+                )}
+              >
+                {bodyText}
+              </p>
             ) : null}
             {link ? (
               <a
                 className={styles.link}
+                {...editable(ctx, data, "linkText", "linkLabel", "ctaText", "buttonText")}
                 href={link.href}
                 {...(isExternal(link.href)
                   ? { rel: "noopener noreferrer" }
