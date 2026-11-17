@@ -70,7 +70,9 @@ export default function proxy(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https: data: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https:",
+    // `https:` does not cover WebSockets; Opal connects over wss:// to Optimizely hosts.
+    // Scoped to *.optimizely.com rather than a bare `wss:`.
+    "connect-src 'self' https: wss://*.optimizely.com",
     // Optimizely Web's snippet embeds an iframe from its project-specific origin.
     // The snippet itself needs no script-src entry: under 'strict-dynamic' host
     // allowlists are ignored, so the nonce on its tag (app/layout.tsx) is what
