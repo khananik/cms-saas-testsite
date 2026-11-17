@@ -14,8 +14,7 @@ Stack: Next.js 16 App Router, React 19, TypeScript (strict). No Tailwind, no CSS
 design tokens in `app/globals.css` plus one CSS Module per block. All dependency versions are
 pinned exactly.
 
-**Node 22.22.2+ or 24.15+ is required** (jsdom, pulled in by the HTML sanitiser, refuses older
-patch lines). Check with `node -v` before `npm install`.
+**Node 22.12+ is required** (`sanitize-html`). Check with `node -v` before `npm install`.
 
 ## File map
 
@@ -30,7 +29,7 @@ patch lines). Check with `node -v` before `npm install`.
 | `lib/fragments.ts` | Per-block GraphQL fragments — **regenerate these from the live schema, see setup**. |
 | `lib/fields.ts` | Tolerant field readers (`pickString`, `pickHtml`, `pickImage`, `pickLink`, `pickList`, `pickNumber`). |
 | `lib/url.ts` | `safeHref` / `safeImageSrc` — URL allowlisting. |
-| `lib/sanitize.ts` | `sanitizeHtml` — DOMPurify with an explicit tag and attribute allowlist. |
+| `lib/sanitize.ts` | `sanitizeHtml` — `sanitize-html` with an explicit tag, attribute and scheme allowlist. |
 | `app/layout.tsx` | Root layout, fonts, global CSS. |
 | `app/[[...slug]]/page.tsx` | Published pages, looked up by URL path. |
 | `app/preview/page.tsx` | Draft pages for the CMS preview iframe. |
@@ -167,8 +166,13 @@ These are deliberate controls, not incidental. Please keep them in place:
   `next.config.mjs`.
 - **`frame-ancestors` pinned to the CMS origin** (in `proxy.ts`, from `OPTIMIZELY_CMS_HOST`) —
   the CMS can frame us, nobody else can. Never widen it to a wildcard.
-- **`RawHtmlBlock` is sanitised** through `lib/sanitize.ts` (DOMPurify, explicit allowlist).
-  `dangerouslySetInnerHTML` is used only on sanitised output.
+- **`RawHtmlBlock` and all rich text are sanitised** through `lib/sanitize.ts` (an explicit tag,
+  attribute and scheme allowlist). `dangerouslySetInnerHTML` is used only on sanitised output.
+  Do not swap this for DOMPurify: `lib/sanitize.ts` is reached from client components as well as
+  server ones, so it has to run in both, and the usual Node shim for DOMPurify
+  (`isomorphic-dompurify` → jsdom) cannot be loaded by Vercel's bundled runtime — jsdom's
+  `html-encoding-sniffer` `require()`s an ESM module and throws `ERR_REQUIRE_ESM` at import
+  time, which takes down every route. `sanitize-html` parses with htmlparser2 and needs no DOM.
 - **The postMessage origin check in `PreviewBridge`** — messages from any origin other than the
   CMS host are ignored.
 - **URL allowlisting in `lib/url.ts`** — only relative paths and `http`/`https`/`mailto`/`tel`.
