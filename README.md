@@ -35,6 +35,8 @@ pinned exactly.
 | `app/preview/page.tsx` | Draft pages for the CMS preview iframe. |
 | `app/preview/PreviewBridge.tsx` | Loads the CMS communication injector and handles CMS messages. |
 | `app/error.tsx`, `app/not-found.tsx` | Error and 404 pages. |
+| `app/sitemap.ts`, `app/robots.ts` | `/sitemap.xml` (every published page, from Graph, refreshed hourly) and `/robots.txt`. |
+| `lib/site.ts` | `siteOrigin()` — this site's public origin, from `SITE_URL`. |
 | `components/ExperienceRenderer.tsx` | Walks the composition tree and renders each node. |
 | `components/registry.ts` | Maps a Graph content type name to a React component. |
 | `components/layout/` | `BlankSection`, `Row`, `Column` — the structural pieces. |
@@ -56,8 +58,9 @@ Then fill in `.env.local`:
 | `OPTIMIZELY_GRAPH_URL` | Graph GraphQL endpoint | Usually `https://cg.optimizely.com/content/v2` |
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | Graph **Single key** used to read published content | CMS dashboard → **Render Content** → Graph keys |
 | `OPTIMIZELY_CMS_HOST` | Full origin of the CMS instance, e.g. `https://example.cms.optimizely.com` | Your CMS URL (scheme + host, no trailing slash) |
+| `SITE_URL` | Public origin of this site, used for absolute URLs in `/sitemap.xml` and `/robots.txt` | Your live domain. Optional on Vercel (falls back to `VERCEL_PROJECT_PRODUCTION_URL`) |
 
-All three are **server-only**. Never prefix any of them with `NEXT_PUBLIC_` — that would inline
+All of them are **server-only**. Never prefix any of them with `NEXT_PUBLIC_` — that would inline
 the Graph key into the browser bundle.
 
 ### How block fields are fetched

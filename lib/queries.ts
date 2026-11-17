@@ -369,6 +369,85 @@ export async function getPageByPath(
   return normalisePage(firstItem(content?._Content?.items));
 }
 
+/* -------------------------------------------------------------------------- */
+/* Published page list (sitemap)                                              */
+/* -------------------------------------------------------------------------- */
+
+/** Graph caps `limit` at 100, so the list is read in pages of that size. */
+const PATH_LIST_PAGE_SIZE = 100;
+/**
+ * Hard ceiling on items read, so a wrong or hostile `total` cannot loop forever.
+ * Well under the 50,000-URL limit of a single sitemap file.
+ */
+const PATH_LIST_MAX_ITEMS = 5000;
+/** The list changes only on publish; an hour is plenty for search engines. */
+const PATH_LIST_REVALIDATE_SECONDS = 3600;
+/**
+ * Same shape the published route accepts: slash-delimited segments of unreserved
+ * URL characters, leading and trailing slash. Anything else is left out of the
+ * sitemap rather than advertised.
+ */
+const LISTED_PATH_PATTERN = /^\/(?:[A-Za-z0-9\-_.~%]+\/)*$/;
+
+export const PUBLISHED_PATHS_QUERY = `
+  query PublishedPaths($skip: Int!) {
+    _Experience(limit: ${PATH_LIST_PAGE_SIZE}, skip: $skip) {
+      total
+      items { _metadata { url { default } published } }
+    }
+  }
+`;
+
+type PublishedPathsResult = {
+  _Experience?: {
+    total?: number | null;
+    items?: ({ _metadata?: { url?: { default?: string | null } | null; published?: string | null } | null } | null)[] | null;
+  } | null;
+};
+
+export type PublishedPath = {
+  /** Site-relative path as Graph stores it, e.g. "/en/business/pricing/". */
+  path: string;
+  /** ISO timestamp of the latest publish, when Graph reports a valid one. */
+  published?: string;
+};
+
+/**
+ * Every published Experience page's path, de-duplicated (Graph can return the same
+ * URL more than once, e.g. per version), keeping the newest publish date.
+ * GraphError propagates to the caller.
+ */
+export async function getPublishedPaths(): Promise<PublishedPath[]> {
+  const byPath = new Map<string, PublishedPath>();
+
+  for (let skip = 0; skip < PATH_LIST_MAX_ITEMS; skip += PATH_LIST_PAGE_SIZE) {
+    const result = await graphQuery<PublishedPathsResult>({
+      query: PUBLISHED_PATHS_QUERY,
+      variables: { skip },
+      revalidate: PATH_LIST_REVALIDATE_SECONDS,
+    });
+
+    const items = result?._Experience?.items ?? [];
+    for (const item of items) {
+      const path = normalisePath(item?._metadata?.url?.default);
+      if (!path || path.includes("..") || !LISTED_PATH_PATTERN.test(path)) continue;
+
+      const rawPublished = item?._metadata?.published;
+      const published =
+        typeof rawPublished === "string" && !Number.isNaN(Date.parse(rawPublished)) ? rawPublished : undefined;
+
+      const existing = byPath.get(path);
+      const isNewer = published !== undefined && (existing?.published === undefined || Date.parse(published) > Date.parse(existing.published));
+      if (!existing || isNewer) byPath.set(path, published ? { path, published } : { path });
+    }
+
+    const total = result?._Experience?.total;
+    if (items.length < PATH_LIST_PAGE_SIZE || typeof total !== "number" || skip + PATH_LIST_PAGE_SIZE >= total) break;
+  }
+
+  return [...byPath.values()];
+}
+
 export type PreviewArgs = {
   key: string;
   version?: string;
