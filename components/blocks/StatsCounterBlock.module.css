@@ -1,0 +1,93 @@
+.block {
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+  padding: var(--ob-space-6) var(--ob-space-3);
+}
+
+.inner {
+  max-width: var(--ob-maxw);
+  margin: 0 auto;
+}
+
+.heading {
+  font-family: var(--ob-font);
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.intro {
+  color: var(--ob-muted);
+  margin: var(--ob-space-2) 0 0;
+  max-width: 60ch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--ob-space-3);
+  margin: var(--ob-space-5) 0 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--ob-space-1);
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+  box-shadow: var(--ob-shadow);
+  padding: var(--ob-space-4) var(--ob-space-3);
+  min-width: 0;
+}
+
+.value {
+  margin: 0;
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ob-accent);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.affix {
+  font-size: 0.65em;
+  font-weight: 600;
+  color: var(--ob-fg);
+}
+
+.label {
+  margin: 0;
+  color: var(--ob-muted);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

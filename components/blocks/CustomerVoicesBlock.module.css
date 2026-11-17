@@ -1,0 +1,248 @@
+.block {
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+  padding-block: var(--ob-space-6);
+}
+
+.inner {
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-inline: var(--ob-space-3);
+  font-family: var(--ob-font);
+}
+
+.header {
+  margin-bottom: var(--ob-space-5);
+  max-width: 60ch;
+}
+
+.heading {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.intro {
+  margin: var(--ob-space-2) 0 0;
+  color: var(--ob-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.viewportWrap {
+  position: relative;
+}
+
+/* Static grid: up to three columns, one column on small screens. */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--ob-space-4);
+  grid-template-columns: 1fr;
+}
+
+/* Slider: CSS-only scroll-snap works with or without JS. */
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--ob-space-2);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--ob-space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.track:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 4px;
+  border-radius: var(--ob-radius);
+}
+
+.item {
+  scroll-snap-align: start;
+  min-width: 0;
+  display: flex;
+}
+
+.card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-3);
+  width: 100%;
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+  box-shadow: var(--ob-shadow);
+  padding: var(--ob-space-4);
+}
+
+.quote {
+  margin: 0;
+  color: var(--ob-fg);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.quote p {
+  margin: 0 0 var(--ob-space-2);
+}
+
+.quote p:last-child {
+  margin-bottom: 0;
+}
+
+.quote a {
+  color: var(--ob-accent);
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--ob-space-3);
+  margin-top: auto;
+  padding-top: var(--ob-space-3);
+  border-top: 1px solid var(--ob-border);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--ob-bg);
+  border: 1px solid var(--ob-border);
+}
+
+.personText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.role {
+  color: var(--ob-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ob-space-3);
+  margin-top: var(--ob-space-4);
+  flex-wrap: wrap;
+}
+
+.arrow {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 1.125rem;
+  color: var(--ob-fg);
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.arrow:hover:not(:disabled) {
+  border-color: var(--ob-accent);
+  color: var(--ob-accent);
+}
+
+.arrow:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.arrow:focus-visible,
+.dot:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: var(--ob-space-1);
+}
+
+.dot {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ob-border);
+}
+
+.dot:hover::before {
+  background: var(--ob-muted);
+}
+
+.dot[aria-current="true"]::before {
+  background: var(--ob-accent);
+  transform: scale(1.3);
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .track {
+    grid-auto-columns: minmax(0, calc(50% - var(--ob-space-4) / 2));
+  }
+}
+
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .track {
+    grid-auto-columns: minmax(0, calc(33.3333% - var(--ob-space-4) * 2 / 3));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    scroll-behavior: auto;
+  }
+
+  .dot[aria-current="true"]::before {
+    transform: none;
+  }
+}

@@ -1,0 +1,164 @@
+.cta {
+  width: 100%;
+  font-family: var(--ob-font);
+  color: var(--ob-fg);
+}
+
+.inner {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin: 0 auto;
+  padding: var(--ob-space-5) var(--ob-space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ob-space-3);
+  text-align: center;
+  border-radius: var(--ob-radius);
+}
+
+/* ---------- Variants ---------- */
+
+.cta[data-variant="accent"] .inner {
+  background: var(--ob-accent);
+  color: var(--ob-accent-fg);
+  box-shadow: var(--ob-shadow);
+}
+
+.cta[data-variant="muted"] .inner {
+  background: var(--ob-surface);
+  color: var(--ob-fg);
+  border: 1px solid var(--ob-border);
+}
+
+.cta[data-variant="outline"] .inner {
+  background: transparent;
+  color: var(--ob-fg);
+  border: 1px solid var(--ob-border);
+}
+
+/* ---------- Content ---------- */
+
+.heading {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+  max-width: 24ch;
+  overflow-wrap: anywhere;
+}
+
+.body {
+  font-size: 1rem;
+  line-height: 1.65;
+  max-width: 60ch;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.body a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+.body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ob-radius);
+}
+
+.cta[data-variant="muted"] .body,
+.cta[data-variant="outline"] .body {
+  color: var(--ob-muted);
+}
+
+.cta[data-variant="muted"] .body a,
+.cta[data-variant="outline"] .body a {
+  color: var(--ob-accent);
+}
+
+/* ---------- Actions ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ob-space-2);
+  margin-top: var(--ob-space-1);
+  width: 100%;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--ob-space-2) var(--ob-space-4);
+  border-radius: var(--ob-radius);
+  border: 1px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.cta[data-variant="accent"] .buttonPrimary {
+  background: var(--ob-accent-fg);
+  color: var(--ob-accent);
+}
+
+.cta[data-variant="accent"] .buttonSecondary {
+  background: transparent;
+  color: var(--ob-accent-fg);
+  border-color: var(--ob-accent-fg);
+}
+
+.cta[data-variant="muted"] .buttonPrimary,
+.cta[data-variant="outline"] .buttonPrimary {
+  background: var(--ob-accent);
+  color: var(--ob-accent-fg);
+  box-shadow: var(--ob-shadow);
+}
+
+.cta[data-variant="muted"] .buttonSecondary,
+.cta[data-variant="outline"] .buttonSecondary {
+  background: transparent;
+  color: var(--ob-fg);
+  border-color: var(--ob-border);
+}
+
+.button:hover {
+  opacity: 0.88;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 3px;
+}
+
+.cta[data-variant="accent"] .button:focus-visible {
+  outline-color: var(--ob-accent-fg);
+}
+
+@media (min-width: 720px) {
+  .inner {
+    padding: var(--ob-space-6) var(--ob-space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

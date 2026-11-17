@@ -1,0 +1,152 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  overflow: hidden;
+  background: var(--ob-surface);
+  color: var(--ob-fg);
+  font-family: var(--ob-font);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--ob-bg) 88%, transparent),
+    color-mix(in srgb, var(--ob-bg) 62%, transparent)
+  );
+}
+
+.inner {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin: 0 auto;
+  padding: var(--ob-space-6) var(--ob-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-3);
+}
+
+.hero[data-has-image="true"] .inner {
+  max-width: var(--ob-maxw);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ob-accent);
+}
+
+.heading {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  max-width: 18ch;
+  overflow-wrap: anywhere;
+}
+
+.subheading {
+  margin: 0;
+  font-size: clamp(1.0625rem, 2.2vw, 1.375rem);
+  line-height: 1.5;
+  color: var(--ob-muted);
+  max-width: 56ch;
+}
+
+.body {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ob-fg);
+  max-width: 64ch;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.body a {
+  color: var(--ob-accent);
+}
+
+.body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ob-radius);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ob-space-2);
+  margin-top: var(--ob-space-2);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--ob-space-2) var(--ob-space-4);
+  border-radius: var(--ob-radius);
+  border: 1px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.ctaPrimary {
+  background: var(--ob-accent);
+  color: var(--ob-accent-fg);
+  box-shadow: var(--ob-shadow);
+}
+
+.ctaSecondary {
+  background: transparent;
+  color: var(--ob-fg);
+  border-color: var(--ob-border);
+}
+
+.cta:hover {
+  opacity: 0.88;
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 3px;
+}
+
+@media (min-width: 720px) {
+  .inner {
+    padding-inline: var(--ob-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}

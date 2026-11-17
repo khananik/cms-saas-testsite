@@ -1,0 +1,230 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import type { BlockComponentProps } from "@/components/registry";
+import { pickList, pickNumber, pickString } from "@/lib/fields";
+import type { BlockData } from "@/lib/types";
+
+import styles from "./StatsCounterBlock.module.css";
+
+const ANIMATION_DURATION_MS = 1400;
+const VISIBILITY_THRESHOLD = 0.25;
+
+type Stat = {
+  id: string;
+  /** Numeric target, when the value could be parsed as a number. */
+  target?: number;
+  /** Decimal places to keep while counting up, derived from the source value. */
+  decimals: number;
+  /** Fallback text shown verbatim when the value is not numeric. */
+  text?: string;
+  prefix?: string;
+  suffix?: string;
+  label?: string;
+};
+
+type ParsedValue = {
+  value: number;
+  decimals: number;
+  prefix?: string;
+  suffix?: string;
+};
+
+function decimalsOf(numericText: string): number {
+  const dot = numericText.indexOf(".");
+  return dot === -1 ? 0 : numericText.length - dot - 1;
+}
+
+/**
+ * Parses a CMS-authored value into a number plus any prefix/suffix the author
+ * baked into the string (e.g. "$1,200+"). Returns undefined for anything that
+ * is not numeric, so the caller can fall back to rendering the raw text.
+ */
+function parseValue(raw: string | undefined, num: number | undefined): ParsedValue | undefined {
+  if (typeof num === "number" && Number.isFinite(num)) {
+    return { value: num, decimals: decimalsOf(String(num)) };
+  }
+
+  if (typeof raw !== "string") return undefined;
+
+  const match = /^([^0-9]*?)([+-]?[0-9][0-9,  \s]*(?:\.[0-9]+)?)(.*)$/.exec(raw.trim());
+  if (!match) return undefined;
+
+  const [, rawPrefix, rawNumber, rawSuffix] = match;
+  if (rawNumber === undefined) return undefined;
+
+  const cleaned = rawNumber.replace(/[,  \s]/g, "");
+  if (!/^[+-]?[0-9]+(\.[0-9]+)?$/.test(cleaned)) return undefined;
+
+  const value = Number(cleaned);
+  if (!Number.isFinite(value)) return undefined;
+
+  const prefix = (rawPrefix ?? "").trim();
+  const suffix = (rawSuffix ?? "").trim();
+
+  return {
+    value,
+    decimals: decimalsOf(cleaned),
+    prefix: prefix.length > 0 ? prefix : undefined,
+    suffix: suffix.length > 0 ? suffix : undefined,
+  };
+}
+
+function formatNumber(value: number, decimals: number, locale: string | undefined): string {
+  try {
+    return new Intl.NumberFormat(locale || "en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(value);
+  } catch {
+    return value.toFixed(decimals);
+  }
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function toStat(item: BlockData, index: number, nodeKey: string): Stat | undefined {
+  const rawValue = pickString(item, "value", "number", "stat", "statistic", "count", "amount", "figure");
+  const numericValue = pickNumber(item, "value", "number", "stat", "statistic", "count", "amount", "figure");
+  const label = pickString(item, "label", "caption", "title", "heading", "name", "text", "description");
+  const parsed = parseValue(rawValue, numericValue);
+
+  if (!parsed && !rawValue && !label) return undefined;
+
+  const prefix = pickString(item, "prefix", "valuePrefix", "symbol") ?? parsed?.prefix;
+  const suffix = pickString(item, "suffix", "valueSuffix", "unit", "unitOfMeasure") ?? parsed?.suffix;
+
+  return {
+    id: `${nodeKey}-stat-${index}`,
+    target: parsed?.value,
+    decimals: parsed?.decimals ?? 0,
+    text: parsed ? undefined : rawValue,
+    prefix,
+    suffix,
+    label,
+  };
+}
+
+export default function StatsCounterBlock({ data, nodeKey, ctx }: BlockComponentProps) {
+  const heading = pickString(data, "heading", "title", "headline", "header");
+  const intro = pickString(data, "intro", "subheading", "description", "summary", "text");
+
+  const stats = useMemo<Stat[]>(() => {
+    const items = pickList(data, "stats", "items", "counters", "statistics", "facts");
+    return items
+      .map((item, index) => toStat(item, index, nodeKey))
+      .filter((stat): stat is Stat => stat !== undefined);
+  }, [data, nodeKey]);
+
+  const sectionRef = useRef<HTMLElement | null>(null);
+  // 1 = fully counted up. Server render and first client render both use 1 so
+  // hydration matches, and viewers without JS/IO/animation keep the real value.
+  const [progress, setProgress] = useState(1);
+
+  const shouldAnimate = stats.some((stat) => typeof stat.target === "number" && stat.target !== 0);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || !shouldAnimate) return;
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
+
+    const reduceMotion =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : undefined;
+    if (!reduceMotion || reduceMotion.matches) return;
+
+    let frame = 0;
+    let startedAt: number | null = null;
+
+    const step = (timestamp: number) => {
+      if (startedAt === null) startedAt = timestamp;
+      const elapsed = Math.min(1, (timestamp - startedAt) / ANIMATION_DURATION_MS);
+      setProgress(easeOutCubic(elapsed));
+      if (elapsed < 1) {
+        frame = window.requestAnimationFrame(step);
+      } else {
+        frame = 0;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.disconnect();
+          // Reset here rather than in the effect body: a synchronous setState in an
+          // effect body triggers a cascading render.
+          setProgress(0);
+          startedAt = null;
+          frame = window.requestAnimationFrame(step);
+          break;
+        }
+      },
+      { threshold: VISIBILITY_THRESHOLD },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+    };
+  }, [shouldAnimate]);
+
+  if (!heading && stats.length === 0) return null;
+
+  const headingId = `${nodeKey}-stats-heading`;
+  const locale = ctx.locale;
+
+  return (
+    <section
+      ref={sectionRef}
+      className={styles.block}
+      aria-labelledby={heading ? headingId : undefined}
+    >
+      <div className={styles.inner}>
+        {heading ? (
+          <h2 id={headingId} className={styles.heading}>
+            {heading}
+          </h2>
+        ) : null}
+        {intro ? <p className={styles.intro}>{intro}</p> : null}
+
+        {stats.length > 0 ? (
+          <dl className={styles.grid}>
+            {stats.map((stat) => {
+              const finalText =
+                typeof stat.target === "number"
+                  ? formatNumber(stat.target, stat.decimals, locale)
+                  : (stat.text ?? "");
+              const animatedText =
+                typeof stat.target === "number"
+                  ? formatNumber(stat.target * progress, stat.decimals, locale)
+                  : finalText;
+              const full = `${stat.prefix ?? ""}${finalText}${stat.suffix ?? ""}`;
+
+              return (
+                <div key={stat.id} className={styles.item}>
+                  <dt className={stat.label ? styles.label : styles.srOnly}>{stat.label ?? full}</dt>
+                  <dd className={styles.value}>
+                    <span aria-hidden="true">
+                      {stat.prefix ? <span className={styles.affix}>{stat.prefix}</span> : null}
+                      <span className={styles.number}>{animatedText}</span>
+                      {stat.suffix ? <span className={styles.affix}>{stat.suffix}</span> : null}
+                    </span>
+                    {/* Final value, never animated, for assistive technology. */}
+                    <span className={styles.srOnly}>{full}</span>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        ) : null}
+      </div>
+    </section>
+  );
+}

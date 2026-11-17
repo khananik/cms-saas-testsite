@@ -1,0 +1,116 @@
+.block {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--ob-space-5) var(--ob-space-3);
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+}
+
+.figure {
+  box-sizing: border-box;
+  max-width: var(--ob-maxw);
+  margin: 0 auto;
+  padding: var(--ob-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-3);
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: var(--ob-radius);
+  box-shadow: var(--ob-shadow);
+  font-family: var(--ob-font);
+}
+
+.rating {
+  margin: 0;
+  display: flex;
+  gap: var(--ob-space-1);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.starOn {
+  color: var(--ob-accent);
+}
+
+.starOff {
+  color: var(--ob-border);
+}
+
+.quote {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.375rem);
+  line-height: 1.55;
+  color: var(--ob-fg);
+}
+
+.quote > div > :first-child,
+.quote > p:first-child {
+  margin-top: 0;
+}
+
+.quote > div > :last-child,
+.quote > p:last-child {
+  margin-bottom: 0;
+}
+
+.quote p {
+  margin: 0 0 var(--ob-space-2);
+}
+
+.quote a {
+  color: var(--ob-accent);
+}
+
+.quote a:focus-visible,
+.block a:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
+  border-radius: calc(var(--ob-radius) / 2);
+}
+
+.quote img {
+  max-width: 100%;
+  height: auto;
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: var(--ob-space-3);
+  padding-top: var(--ob-space-3);
+  border-top: 1px solid var(--ob-border);
+}
+
+.avatar {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--ob-border);
+}
+
+.captionText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-1);
+  min-width: 0;
+}
+
+.authorName {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.authorMeta {
+  font-size: 0.9375rem;
+  color: var(--ob-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .figure {
+    padding: var(--ob-space-5);
+  }
+}

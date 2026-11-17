@@ -1,0 +1,300 @@
+import "server-only";
+
+import { graphQuery } from "@/lib/graph";
+import { BLOCK_FRAGMENTS } from "@/lib/fragments";
+import type { ExperiencePage } from "@/lib/types";
+
+/**
+ * Query construction for testsiteanik.
+ *
+ * Rules that must not be relaxed:
+ *  - The request path, locale, content key and version all come from the URL
+ *    and are therefore UNTRUSTED. They are passed as GraphQL *variables*
+ *    only — never interpolated into a query string.
+ *  - Only the fragment text (a compile-time constant from lib/fragments.ts)
+ *    is interpolated.
+ *  - The preview token is handed straight to graphQuery, which puts it in an
+ *    Authorization header. It never appears in a query, a variable or a URL.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Composition selection                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Some Graph instances expose the composition node types as
+ * `CompositionStructureNode` / `CompositionComponentNode`, others prefix them
+ * with `I`. If the whole query fails with "Unknown type", flip these two
+ * constants — that is the only change needed.
+ */
+export const STRUCTURE_NODE_TYPE = "CompositionStructureNode";
+export const COMPONENT_NODE_TYPE = "CompositionComponentNode";
+
+const NODE_FIELDS = `
+  __typename
+  key
+  nodeType
+  displayName
+  displayTemplateKey
+  displaySettings { key value }
+`;
+
+const COMPONENT_SELECTION = `
+  ... on ${COMPONENT_NODE_TYPE} {
+    component {
+      _metadata {
+        key
+        version
+        locale
+        displayName
+        types
+        url { default hierarchical }
+      }
+      ${BLOCK_FRAGMENTS}
+    }
+  }
+`;
+
+/**
+ * GraphQL cannot recurse, so the section > row > column > component tree is
+ * spelled out level by level. `depth` is the number of levels still to emit.
+ */
+function compositionNodes(depth: number): string {
+  const children =
+    depth > 1
+      ? `... on ${STRUCTURE_NODE_TYPE} { nodes { ${compositionNodes(depth - 1)} } }`
+      : "";
+  return `${NODE_FIELDS}\n${COMPONENT_SELECTION}\n${children}`;
+}
+
+/** composition (root) > section > row > column > component */
+const COMPOSITION_SELECTION = `
+  composition {
+    ${NODE_FIELDS}
+    nodes { ${compositionNodes(4)} }
+  }
+`;
+
+const PAGE_METADATA_SELECTION = `
+  _metadata {
+    key
+    version
+    locale
+    displayName
+    types
+    url { default hierarchical }
+    published
+  }
+`;
+
+const PAGE_SELECTION = `${PAGE_METADATA_SELECTION}\n${COMPOSITION_SELECTION}`;
+
+/* -------------------------------------------------------------------------- */
+/* Queries                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Published Experience page looked up by `_metadata.url.default`. */
+export const PAGE_BY_PATH_QUERY = `
+  query PageByPath($path: String!) {
+    _Experience(
+      where: { _metadata: { url: { default: { eq: $path } } } }
+      limit: 1
+    ) {
+      items { ${PAGE_SELECTION} }
+    }
+  }
+`;
+
+/** As above, restricted to one locale. */
+export const PAGE_BY_PATH_LOCALE_QUERY = `
+  query PageByPathLocale($path: String!, $locale: String!) {
+    _Experience(
+      where: {
+        _metadata: {
+          url: { default: { eq: $path } }
+          locale: { eq: $locale }
+        }
+      }
+      limit: 1
+    ) {
+      items { ${PAGE_SELECTION} }
+    }
+  }
+`;
+
+/**
+ * Fallback for paths that are not Experience pages. `_Content` is the root
+ * interface and is present on every instance; `_Page` is instance-specific,
+ * so it is deliberately not queried here.
+ */
+export const CONTENT_BY_PATH_QUERY = `
+  query ContentByPath($path: String!) {
+    _Content(
+      where: { _metadata: { url: { default: { eq: $path } } } }
+      limit: 1
+    ) {
+      items { ${PAGE_METADATA_SELECTION} }
+    }
+  }
+`;
+
+export const CONTENT_BY_PATH_LOCALE_QUERY = `
+  query ContentByPathLocale($path: String!, $locale: String!) {
+    _Content(
+      where: {
+        _metadata: {
+          url: { default: { eq: $path } }
+          locale: { eq: $locale }
+        }
+      }
+      limit: 1
+    ) {
+      items { ${PAGE_METADATA_SELECTION} }
+    }
+  }
+`;
+
+/** Draft content by key — read with the CMS-supplied preview token. */
+export const PREVIEW_BY_KEY_QUERY = `
+  query PreviewByKey($key: String!) {
+    _Experience(where: { _metadata: { key: { eq: $key } } }, limit: 1) {
+      items { ${PAGE_SELECTION} }
+    }
+  }
+`;
+
+/** Draft content pinned to one exact version. */
+export const PREVIEW_BY_KEY_VERSION_QUERY = `
+  query PreviewByKeyVersion($key: String!, $version: String!) {
+    _Experience(
+      where: { _metadata: { key: { eq: $key }, version: { eq: $version } } }
+      limit: 1
+    ) {
+      items { ${PAGE_SELECTION} }
+    }
+  }
+`;
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+type ExperienceResult = {
+  _Experience?: { items?: (ExperiencePage | null)[] | null } | null;
+};
+
+type ContentResult = {
+  _Content?: { items?: (ExperiencePage | null)[] | null } | null;
+};
+
+const MAX_PATH_LENGTH = 1024;
+/** Locale tags only: letters, digits and hyphens (e.g. "en", "en-GB"). */
+const LOCALE_PATTERN = /^[A-Za-z0-9-]{2,35}$/;
+/** Graph keys/versions are opaque ids; allow only id-safe characters. */
+const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
+
+function firstItem(
+  items: (ExperiencePage | null)[] | null | undefined,
+): ExperiencePage | null {
+  if (!Array.isArray(items)) return null;
+  for (const item of items) {
+    if (item) return item;
+  }
+  return null;
+}
+
+/**
+ * Normalise an untrusted request path to the form Graph stores in
+ * `_metadata.url.default`: always a leading and trailing slash, no duplicate
+ * slashes, no query string or fragment. Returns undefined when the input
+ * cannot be used (over-long, or not a string).
+ */
+export function normalisePath(input: unknown): string | undefined {
+  if (typeof input !== "string") return undefined;
+  if (input.length > MAX_PATH_LENGTH) return undefined;
+
+  // Strip query and fragment, and anything after a NUL.
+  let path = input.split("#")[0]?.split("?")[0] ?? "";
+  if (path.includes("\0")) return undefined;
+
+  path = path.replace(/\/+/g, "/");
+  if (!path.startsWith("/")) path = `/${path}`;
+  if (!path.endsWith("/")) path = `${path}/`;
+
+  if (path.length > MAX_PATH_LENGTH) return undefined;
+  return path;
+}
+
+function normaliseLocale(locale: string | undefined): string | undefined {
+  if (typeof locale !== "string") return undefined;
+  const trimmed = locale.trim();
+  return LOCALE_PATTERN.test(trimmed) ? trimmed : undefined;
+}
+
+/**
+ * Published page for a URL path. Tries the Experience lookup first and falls
+ * back to generic content. Returns null when nothing matches; GraphError from
+ * the transport propagates to the caller.
+ */
+export async function getPageByPath(
+  path: string,
+  locale?: string,
+): Promise<ExperiencePage | null> {
+  const normalisedPath = normalisePath(path);
+  if (!normalisedPath) return null;
+
+  const normalisedLocale = normaliseLocale(locale);
+  const variables: Record<string, unknown> = normalisedLocale
+    ? { path: normalisedPath, locale: normalisedLocale }
+    : { path: normalisedPath };
+
+  const experience = await graphQuery<ExperienceResult>({
+    query: normalisedLocale ? PAGE_BY_PATH_LOCALE_QUERY : PAGE_BY_PATH_QUERY,
+    variables,
+  });
+
+  const page = firstItem(experience?._Experience?.items);
+  if (page) return page;
+
+  const content = await graphQuery<ContentResult>({
+    query: normalisedLocale
+      ? CONTENT_BY_PATH_LOCALE_QUERY
+      : CONTENT_BY_PATH_QUERY,
+    variables,
+  });
+
+  return firstItem(content?._Content?.items);
+}
+
+export type PreviewArgs = {
+  key: string;
+  version?: string;
+  locale?: string;
+  previewToken: string;
+};
+
+/**
+ * Draft content for the CMS preview iframe. The token authorises the read and
+ * is passed to graphQuery only — it is never part of the query or variables.
+ */
+export async function getPreviewContent(
+  args: PreviewArgs,
+): Promise<ExperiencePage | null> {
+  const { key, version, previewToken } = args;
+
+  if (typeof previewToken !== "string" || previewToken.length === 0) return null;
+  if (typeof key !== "string" || !ID_PATTERN.test(key)) return null;
+
+  const hasVersion = typeof version === "string" && ID_PATTERN.test(version);
+  const variables: Record<string, unknown> = hasVersion
+    ? { key, version }
+    : { key };
+
+  const result = await graphQuery<ExperienceResult>({
+    query: hasVersion ? PREVIEW_BY_KEY_VERSION_QUERY : PREVIEW_BY_KEY_QUERY,
+    variables,
+    previewToken,
+  });
+
+  return firstItem(result?._Experience?.items);
+}

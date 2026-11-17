@@ -1,0 +1,182 @@
+/* ============================================================
+   testsiteanik — global design tokens, reset and utilities.
+   Block-specific styling lives in each block's own CSS Module.
+   ============================================================ */
+
+:root {
+  /* Colour */
+  --ob-bg: #ffffff;
+  --ob-fg: #14181f;
+  --ob-muted: #5b6472;
+  --ob-surface: #f5f7fa;
+  --ob-border: #dfe4ec;
+  --ob-accent: #0b5fff;
+  --ob-accent-fg: #ffffff;
+
+  /* Spacing scale */
+  --ob-space-1: 4px;
+  --ob-space-2: 8px;
+  --ob-space-3: 16px;
+  --ob-space-4: 24px;
+  --ob-space-5: 40px;
+  --ob-space-6: 64px;
+
+  /* Shape and layout */
+  --ob-radius: 10px;
+  --ob-maxw: 1120px;
+
+  /* Typography */
+  --ob-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+
+  /* Elevation */
+  --ob-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ob-bg: #0e1116;
+    --ob-fg: #eef1f6;
+    --ob-muted: #a3adbd;
+    --ob-surface: #161b23;
+    --ob-border: #2a313c;
+    --ob-accent: #6ea0ff;
+    --ob-accent-fg: #0b1220;
+    --ob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul[class],
+ol[class] {
+  list-style: none;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+  font-family: var(--ob-font);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas,
+picture {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--ob-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--ob-border);
+}
+
+/* ---------- Utilities ---------- */
+
+.ob-container {
+  width: 100%;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-inline: var(--ob-space-3);
+}
+
+.ob-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Focus ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--ob-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

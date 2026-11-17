@@ -1,0 +1,70 @@
+/* Composition layout primitives. Tokens only — no hardcoded colours. */
+
+.section {
+  display: block;
+  width: 100%;
+  padding-block: var(--ob-space-5);
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+  padding-inline: var(--ob-space-3); /* 16px gutter at 360px */
+}
+
+.containerFull {
+  width: 100%;
+  padding-inline: var(--ob-space-3);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ob-space-4);
+  align-items: stretch;
+  width: 100%;
+}
+
+.justifyStart {
+  justify-content: flex-start;
+}
+
+.justifyCenter {
+  justify-content: center;
+}
+
+.justifyEnd {
+  justify-content: flex-end;
+}
+
+.column {
+  flex: 1 1 0;
+  min-width: 0; /* lets long words and wide children shrink instead of overflowing */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-3);
+}
+
+/* Single column below 860px; the inline flex-basis from display settings is
+   overridden so narrow screens never scroll sideways. */
+@media (max-width: 860px) {
+  .row {
+    flex-direction: column;
+    gap: var(--ob-space-4);
+  }
+
+  .column {
+    flex-basis: auto !important;
+    max-width: 100% !important;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding-block: var(--ob-space-4);
+  }
+}
