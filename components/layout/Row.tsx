@@ -1,4 +1,5 @@
 import styles from "./layout.module.css";
+import { displayAttributes } from "@/lib/display";
 import { readSetting, type LayoutNodeProps } from "./BlankSection";
 
 const JUSTIFY: Record<string, string | undefined> = {
@@ -20,5 +21,11 @@ export default function Row({ node, children }: LayoutNodeProps) {
 
   const justify = JUSTIFY[readSetting(node, /justify|align|position/i) ?? ""];
 
-  return <div className={justify ? `${styles.row} ${justify}` : styles.row}>{children}</div>;
+  const className = justify ? `ob-row ${styles.row} ${justify}` : `ob-row ${styles.row}`;
+
+  return (
+    <div className={className} {...displayAttributes(node)}>
+      {children}
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { CompositionStructureNode, DisplaySetting, RenderContext } from "@/lib/types";
+import { displayAttributes } from "@/lib/display";
 import styles from "./layout.module.css";
 
 export type LayoutNodeProps = {
@@ -40,7 +41,11 @@ export default function BlankSection({ node, children }: LayoutNodeProps) {
   const isFull = width === "full" || width === "fullwidth" || width === "wide";
 
   return (
-    <section className={styles.section} aria-label={node?.displayName ?? undefined}>
+    <section
+      className={`ob-section ${styles.section}`}
+      {...displayAttributes(node)}
+      aria-label={node?.displayName ?? undefined}
+    >
       <div className={isFull ? styles.containerFull : styles.container}>{children}</div>
     </section>
   );

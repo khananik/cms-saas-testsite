@@ -3,6 +3,10 @@
    Block-specific styling lives in each block's own CSS Module.
    ============================================================ */
 
+/* Visual Builder display settings (attribute-selector mapping).
+   CSS requires @import to precede all other rules, so it sits here. */
+@import "./display.css";
+
 :root {
   /* Colour */
   --ob-bg: #ffffff;

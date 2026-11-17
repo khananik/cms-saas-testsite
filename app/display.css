@@ -1,0 +1,556 @@
+/* ============================================================
+   display.css — Visual Builder display settings.
+
+   The renderer spreads displayAttributes(node) (lib/display.ts) onto
+   each composition wrapper: .ob-section / .ob-row / .ob-column / .ob-node.
+   Every rule below maps one observed data-ob-* attribute to styling, so a
+   setting behaves identically wherever an editor applies it, and a new
+   value is a change in THIS file only.
+
+   Inventory source: the harvested live-instance settings list. Nothing
+   here is invented; every selector matches a value actually observed.
+
+   COLOUR APPROXIMATIONS
+   ---------------------
+   We do not have the official Optimizely brand values, so the branded
+   surfaces — opal, blueGrad, purple and brand — are tasteful, WCAG-AA
+   approximations. To correct them, edit ONLY the :root tokens below
+   (and their dark-mode counterparts); no rule hardcodes a colour:
+     --ob-bg-opal / --ob-fg-opal
+     --ob-bg-bluegrad-a / --ob-bg-bluegrad-b / --ob-fg-bluegrad
+     --ob-bg-purple / --ob-fg-purple
+     --ob-bg-brand  / --ob-fg-brand
+   Each surface also owns -muted, -border and -accent tokens so that
+   secondary text, rules and links stay readable on it.
+   ============================================================ */
+
+:root {
+  /* --- Plain surfaces --- */
+  --ob-bg-white: #ffffff;
+  --ob-fg-white: #14181f;
+  --ob-muted-white: #5b6472;
+  --ob-border-white: #dfe4ec;
+  --ob-accent-white: #0b5fff;
+
+  --ob-bg-offwhite: #f5f7fa;
+  --ob-fg-offwhite: #14181f;
+  --ob-muted-offwhite: #5b6472;
+  --ob-border-offwhite: #d9e0ea;
+  --ob-accent-offwhite: #0b5fff;
+
+  /* --- Branded surfaces (approximations — see header) --- */
+  --ob-bg-opal: #dff1ee;
+  --ob-fg-opal: #0f2420;
+  --ob-muted-opal: #3f5a55;
+  --ob-border-opal: #bcddd7;
+  --ob-accent-opal: #0a5a4e;
+
+  --ob-bg-bluegrad-a: #e7efff;
+  --ob-bg-bluegrad-b: #f1ecff;
+  --ob-fg-bluegrad: #121a2e;
+  --ob-muted-bluegrad: #46506b;
+  --ob-border-bluegrad: #cdd8f2;
+  --ob-accent-bluegrad: #1a46c8;
+
+  --ob-bg-purple: #3a1d6e;
+  --ob-fg-purple: #ffffff;
+  --ob-muted-purple: #d6c9ef;
+  --ob-border-purple: #57399069;
+  --ob-accent-purple: #cbb6ff;
+
+  --ob-bg-brand: #10224a;
+  --ob-fg-brand: #ffffff;
+  --ob-muted-brand: #c3cee4;
+  --ob-border-brand: #2c3f6e;
+  --ob-accent-brand: #9fc2ff;
+
+  --ob-bg-dark: #14181f;
+  --ob-fg-dark: #eef1f6;
+  --ob-muted-dark: #a9b3c2;
+  --ob-border-dark: #2f3742;
+  --ob-accent-dark: #8fb6ff;
+
+  /* Decorative only (headlineStyle: extruded) */
+  --ob-extrude: #3a1d6e;
+}
+
+/* Dark mode — same pattern globals.css already uses. Light surfaces are
+   re-tuned rather than left bright, so a page never flashes white panels. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ob-bg-white: #161b23;
+    --ob-fg-white: #eef1f6;
+    --ob-muted-white: #a3adbd;
+    --ob-border-white: #2a313c;
+    --ob-accent-white: #6ea0ff;
+
+    --ob-bg-offwhite: #12161d;
+    --ob-fg-offwhite: #eef1f6;
+    --ob-muted-offwhite: #a3adbd;
+    --ob-border-offwhite: #262d38;
+    --ob-accent-offwhite: #6ea0ff;
+
+    --ob-bg-opal: #12302c;
+    --ob-fg-opal: #e6f5f1;
+    --ob-muted-opal: #a8c9c2;
+    --ob-border-opal: #264a44;
+    --ob-accent-opal: #7fd9c7;
+
+    --ob-bg-bluegrad-a: #141d33;
+    --ob-bg-bluegrad-b: #1e1b33;
+    --ob-fg-bluegrad: #eef1f6;
+    --ob-muted-bluegrad: #aab4ca;
+    --ob-border-bluegrad: #2b3350;
+    --ob-accent-bluegrad: #9fc2ff;
+
+    --ob-bg-purple: #2a1552;
+    --ob-fg-purple: #f4efff;
+    --ob-muted-purple: #c9b9e8;
+    --ob-border-purple: #42286f;
+    --ob-accent-purple: #cbb6ff;
+
+    --ob-bg-brand: #0c1935;
+    --ob-fg-brand: #eef1f6;
+    --ob-muted-brand: #b2bed6;
+    --ob-border-brand: #22314f;
+    --ob-accent-brand: #9fc2ff;
+
+    --ob-bg-dark: #0a0d12;
+    --ob-fg-dark: #eef1f6;
+    --ob-muted-dark: #a9b3c2;
+    --ob-border-dark: #252c36;
+    --ob-accent-dark: #8fb6ff;
+
+    --ob-extrude: #cbb6ff;
+  }
+}
+
+/* ============================================================
+   1. Wrapper baselines
+   ============================================================ */
+
+.ob-section,
+.ob-row,
+.ob-column,
+.ob-node {
+  min-width: 0; /* grid/flex children must be allowed to shrink — no 360px overflow */
+}
+
+.ob-section {
+  display: block;
+  width: 100%;
+}
+
+.ob-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ob-space-4);
+  width: 100%;
+}
+
+.ob-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: min(100%, 18rem);
+}
+
+.ob-node {
+  display: block;
+  width: 100%;
+}
+
+/* ============================================================
+   2. background — sections, columns and component nodes
+   Each value redefines the local colour tokens, so descendants
+   (headings, body copy, borders, links) inherit a readable set.
+   ============================================================ */
+
+.ob-section[data-ob-background="transparent"],
+.ob-column[data-ob-background="transparent"],
+.ob-node[data-ob-background="transparent"] {
+  background: transparent;
+}
+
+.ob-section[data-ob-background="white"],
+.ob-column[data-ob-background="white"],
+.ob-node[data-ob-background="white"] {
+  --ob-fg: var(--ob-fg-white);
+  --ob-muted: var(--ob-muted-white);
+  --ob-border: var(--ob-border-white);
+  --ob-accent: var(--ob-accent-white);
+  background: var(--ob-bg-white);
+  color: var(--ob-fg-white);
+}
+
+.ob-section[data-ob-background="offwhite"],
+.ob-column[data-ob-background="offwhite"],
+.ob-node[data-ob-background="offwhite"] {
+  --ob-fg: var(--ob-fg-offwhite);
+  --ob-muted: var(--ob-muted-offwhite);
+  --ob-border: var(--ob-border-offwhite);
+  --ob-accent: var(--ob-accent-offwhite);
+  background: var(--ob-bg-offwhite);
+  color: var(--ob-fg-offwhite);
+}
+
+.ob-section[data-ob-background="opal"],
+.ob-column[data-ob-background="opal"],
+.ob-node[data-ob-background="opal"] {
+  --ob-fg: var(--ob-fg-opal);
+  --ob-muted: var(--ob-muted-opal);
+  --ob-border: var(--ob-border-opal);
+  --ob-accent: var(--ob-accent-opal);
+  background: var(--ob-bg-opal);
+  color: var(--ob-fg-opal);
+}
+
+.ob-section[data-ob-background="bluegrad"],
+.ob-column[data-ob-background="bluegrad"],
+.ob-node[data-ob-background="bluegrad"] {
+  --ob-fg: var(--ob-fg-bluegrad);
+  --ob-muted: var(--ob-muted-bluegrad);
+  --ob-border: var(--ob-border-bluegrad);
+  --ob-accent: var(--ob-accent-bluegrad);
+  background-color: var(--ob-bg-bluegrad-a);
+  background-image: linear-gradient(135deg, var(--ob-bg-bluegrad-a), var(--ob-bg-bluegrad-b));
+  color: var(--ob-fg-bluegrad);
+}
+
+.ob-section[data-ob-background="purple"],
+.ob-column[data-ob-background="purple"],
+.ob-node[data-ob-background="purple"] {
+  --ob-fg: var(--ob-fg-purple);
+  --ob-muted: var(--ob-muted-purple);
+  --ob-border: var(--ob-border-purple);
+  --ob-accent: var(--ob-accent-purple);
+  background: var(--ob-bg-purple);
+  color: var(--ob-fg-purple);
+}
+
+.ob-section[data-ob-background="brand"],
+.ob-column[data-ob-background="brand"],
+.ob-node[data-ob-background="brand"] {
+  --ob-fg: var(--ob-fg-brand);
+  --ob-muted: var(--ob-muted-brand);
+  --ob-border: var(--ob-border-brand);
+  --ob-accent: var(--ob-accent-brand);
+  background: var(--ob-bg-brand);
+  color: var(--ob-fg-brand);
+}
+
+.ob-section[data-ob-background="dark"],
+.ob-column[data-ob-background="dark"],
+.ob-node[data-ob-background="dark"] {
+  --ob-fg: var(--ob-fg-dark);
+  --ob-muted: var(--ob-muted-dark);
+  --ob-border: var(--ob-border-dark);
+  --ob-accent: var(--ob-accent-dark);
+  background: var(--ob-bg-dark);
+  color: var(--ob-fg-dark);
+}
+
+/* A painted surface needs breathing room and must not bleed its text to
+   the viewport edge; the measure is restored in §6 (width / maxWidth). */
+.ob-section[data-ob-background]:not([data-ob-background="transparent"]),
+.ob-column[data-ob-background]:not([data-ob-background="transparent"]),
+.ob-node[data-ob-background]:not([data-ob-background="transparent"]) {
+  padding-inline: var(--ob-space-3);
+}
+
+/* A full-bleed section keeps its rows within the measure. */
+.ob-section > .ob-row {
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+}
+
+/* textColor: auto — inherit whatever the surface above decided. */
+.ob-section[data-ob-textcolor="auto"],
+.ob-column[data-ob-textcolor="auto"],
+.ob-node[data-ob-textcolor="auto"] {
+  color: inherit;
+}
+
+/* ============================================================
+   3. Typography — headingSize, textSize, fontStyle, headlineStyle
+   Heading rules are scoped to the node's own descendants.
+   ============================================================ */
+
+.ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3) {
+  font-size: clamp(2rem, 1.3rem + 3.2vw, 3.25rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ob-node[data-ob-headingsize="lg"] :is(h1, h2, h3) {
+  font-size: clamp(1.625rem, 1.2rem + 1.9vw, 2.375rem);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.ob-node[data-ob-headingsize="md"] :is(h1, h2, h3) {
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.ob-node[data-ob-textsize="sm"] {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.ob-node[data-ob-textsize="md"] {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.ob-node[data-ob-fontstyle="modern"] {
+  font-family: var(--ob-font);
+  font-feature-settings: "ss01" 1;
+}
+
+.ob-node[data-ob-fontstyle="classic"] {
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
+
+/* headlineStyle: extruded — the layered-shadow display treatment. */
+.ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+  text-shadow:
+    1px 1px 0 var(--ob-extrude),
+    2px 2px 0 var(--ob-extrude),
+    3px 3px 0 var(--ob-extrude);
+  text-wrap: balance;
+}
+
+@media (prefers-contrast: more) {
+  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+    text-shadow: none;
+  }
+}
+
+/* ============================================================
+   4. Alignment — textAlign / alignment / contentAlign
+   ============================================================ */
+
+.ob-node[data-ob-textalign="left"],
+.ob-node[data-ob-alignment="left"],
+.ob-column[data-ob-contentalign="left"] {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.ob-node[data-ob-textalign="center"],
+.ob-node[data-ob-alignment="center"],
+.ob-column[data-ob-contentalign="center"] {
+  text-align: center;
+  align-items: center;
+}
+
+/* A centred node keeps its own measure centred too. */
+.ob-node[data-ob-textalign="center"] > *,
+.ob-node[data-ob-alignment="center"] > * {
+  margin-inline: auto;
+}
+
+/* ============================================================
+   5. Spacing — paddingY, verticalPadding, padding, gap, spacing
+   ============================================================ */
+
+.ob-section[data-ob-paddingy="none"],
+.ob-node[data-ob-verticalpadding="none"] {
+  padding-block: 0;
+}
+
+.ob-section[data-ob-paddingy="default"],
+.ob-node[data-ob-verticalpadding="default"] {
+  padding-block: var(--ob-space-5);
+}
+
+.ob-section[data-ob-paddingy="large"] {
+  padding-block: var(--ob-space-6);
+}
+
+.ob-column[data-ob-padding="none"] {
+  padding: 0;
+}
+
+.ob-row[data-ob-gap="compact"] {
+  gap: var(--ob-space-3);
+}
+
+.ob-row[data-ob-gap="default"] {
+  gap: var(--ob-space-4);
+}
+
+.ob-node[data-ob-spacing="default"] {
+  --ob-node-gap: var(--ob-space-4);
+}
+
+/* ============================================================
+   6. Measure — width, maxWidth, contentWidth
+   ============================================================ */
+
+.ob-node[data-ob-width="full"] {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+.ob-node[data-ob-width="contained"],
+.ob-node[data-ob-contentwidth="default"] {
+  width: 100%;
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+}
+
+.ob-node[data-ob-width="wide"] {
+  width: 100%;
+  max-width: min(100%, calc(var(--ob-maxw) + 15rem));
+  margin-inline: auto;
+}
+
+.ob-row[data-ob-maxwidth="default"] {
+  max-width: var(--ob-maxw);
+  margin-inline: auto;
+}
+
+/* fullWidth / full — edge to edge, but still padded so text never
+   touches the viewport edge at 360px. */
+.ob-row[data-ob-maxwidth="fullwidth"],
+.ob-row[data-ob-maxwidth="full"] {
+  max-width: none;
+  margin-inline: 0;
+}
+
+/* ============================================================
+   7. Row and column layout — verticalAlign, columnRatio, reverse
+   ============================================================ */
+
+.ob-row[data-ob-verticalalign="top"] {
+  align-items: flex-start;
+}
+
+.ob-row[data-ob-verticalalign="center"] {
+  align-items: center;
+}
+
+.ob-row[data-ob-verticalalign="stretch"] {
+  align-items: stretch;
+}
+
+.ob-row[data-ob-columnratio="equal"] > .ob-column {
+  flex: 1 1 0;
+}
+
+/* reverse: observed as false; the true case is written so the setting
+   works the moment an editor flips it. Only above the wrap point —
+   on a phone the columns stack in authored order. */
+.ob-row[data-ob-reverse="false"] {
+  flex-direction: row;
+}
+
+@media (min-width: 48rem) {
+  .ob-row[data-ob-reverse="true"] {
+    flex-direction: row-reverse;
+  }
+}
+
+/* ============================================================
+   8. Shape — rounded, cornerRadius, divider
+   ============================================================ */
+
+.ob-column[data-ob-rounded="true"],
+.ob-node[data-ob-rounded="true"] {
+  border-radius: var(--ob-radius);
+  overflow: hidden;
+}
+
+.ob-column[data-ob-rounded="false"],
+.ob-node[data-ob-rounded="false"] {
+  border-radius: 0;
+}
+
+.ob-section[data-ob-cornerradius="none"] {
+  border-radius: 0;
+}
+
+.ob-section[data-ob-divider="none"] {
+  border-top: 0;
+  border-bottom: 0;
+}
+
+/* ============================================================
+   9. Media — aspectRatio, columns, height, size, fullColor
+   ============================================================ */
+
+.ob-node[data-ob-aspectratio="auto"] :is(img, video, iframe) {
+  aspect-ratio: auto;
+}
+
+.ob-node[data-ob-aspectratio="r16x9"] :is(img, video, iframe) {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* columns — a grid hook for components that lay their items out in a
+   grid; the component reads --ob-node-columns, or inherits the fallback. */
+.ob-node[data-ob-columns="default"] {
+  --ob-node-columns: 3;
+}
+
+.ob-node[data-ob-columns="four"] {
+  --ob-node-columns: 4;
+}
+
+.ob-node[data-ob-height="default"],
+.ob-node[data-ob-size="default"] {
+  height: auto;
+}
+
+/* fullColor is purely visual: colour imagery vs. a monochrome treatment. */
+.ob-node[data-ob-fullcolor="true"] :is(img, svg) {
+  filter: none;
+}
+
+.ob-node[data-ob-fullcolor="false"] :is(img, svg) {
+  filter: grayscale(1);
+  opacity: 0.75;
+}
+
+/* ============================================================
+   10. Narrow viewports — nothing may scroll sideways at 360px
+   ============================================================ */
+
+@media (max-width: 30rem) {
+  .ob-row {
+    flex-direction: column;
+    gap: var(--ob-space-3);
+  }
+
+  .ob-column {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .ob-section[data-ob-paddingy="large"] {
+    padding-block: var(--ob-space-5);
+  }
+
+  .ob-node[data-ob-headingsize="xl"] :is(h1, h2, h3),
+  .ob-node[data-ob-headlinestyle="extruded"] :is(h1, h2) {
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+}
+
+/* ============================================================
+   NOT IMPLEMENTED HERE — on purpose
+   showAccent, showIcon, showNames, showReason and overlay each decide
+   whether an element exists at all (an accent bar, an icon, a name
+   label, a reason line, a scrim layer). CSS can only hide something
+   already rendered, which still ships the markup and leaves it in the
+   accessibility tree, so those belong in the block components. They
+   are also observed with a single value in the live inventory, so a
+   rule here would be guesswork either way.
+   ============================================================ */

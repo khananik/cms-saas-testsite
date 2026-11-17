@@ -6,6 +6,7 @@ import type {
   RenderContext,
 } from "@/lib/types";
 import { isComponentNode, isStructureNode } from "@/lib/types";
+import { displayAttributes } from "@/lib/display";
 import { resolveBlock } from "@/components/registry";
 import BlankSection from "@/components/layout/BlankSection";
 import Row from "@/components/layout/Row";
@@ -142,10 +143,25 @@ function RenderComponent({
   // during render (and React's lint rules flag it as such).
   const rendered = createElement(Component, { data, nodeKey, ctx });
 
-  // Edit-mode wrapper only: the on-page editor needs the block id to map a
-  // rendered element back to its composition node. Published output stays clean.
-  if (ctx.isEditMode) {
-    return <div data-epi-block-id={nodeKey}>{rendered}</div>;
+  // The node's display settings (background, headingSize, width, ...) are emitted as
+  // `data-ob-*` attributes for app/display.css to style via attribute selectors.
+  const display = displayAttributes(node);
+  const hasDisplay = Object.keys(display).length > 0;
+
+  // A wrapper exists when there is something for it to carry: display attributes in
+  // any context, or the block id the on-page editor needs to map a rendered element
+  // back to its composition node. `data-epi-block-id` stays edit-mode only, and a
+  // node with neither gets no wrapper at all, so published output stays clean.
+  if (hasDisplay || ctx.isEditMode) {
+    return (
+      <div
+        className="ob-node"
+        {...display}
+        {...(ctx.isEditMode ? { "data-epi-block-id": nodeKey } : {})}
+      >
+        {rendered}
+      </div>
+    );
   }
 
   return rendered;

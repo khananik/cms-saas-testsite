@@ -1,4 +1,5 @@
 import styles from "./layout.module.css";
+import { displayAttributes } from "@/lib/display";
 import { readSetting, type LayoutNodeProps } from "./BlankSection";
 
 /**
@@ -53,7 +54,8 @@ export default function Column({ node, children }: LayoutNodeProps) {
 
   return (
     <div
-      className={styles.column}
+      className={`ob-column ${styles.column}`}
+      {...displayAttributes(node)}
       style={basis ? { flexBasis: basis, maxWidth: basis } : undefined}
     >
       {children}
